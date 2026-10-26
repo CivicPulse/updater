@@ -411,6 +411,11 @@ PLAYWRIGHT_BROWSERS_PATH=/tmp/civpulse-playwright uv run --extra browser civpuls
 that window; collection resumes when Simbli returns the requested listing or
 document. If the verified page does not redirect, reload the page manually.
 Closing the window cancels that recovery. A working desktop display is required.
+After manual verification, the recognized empty official attachment form ends
+the browser wait and preserves session cookies. Its HTML remains failed document
+evidence; it cannot become a valid file or complete meeting bundle. Unknown HTML
+and challenge responses do not receive this treatment.
+
 No CAPTCHA solver, answer generation, stealth patches, or persistent browser
 profile is used. Successful session cookies stay in memory for this run only.
 

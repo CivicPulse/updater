@@ -17,6 +17,7 @@ from civpulse_updater.transport import FetchError
 URL = "https://simbli.eboardsolutions.com/Meetings/Attachment.aspx?S=4013&AID=123&MID=138067"
 HTML = b'<!doctype html><html><title>Pardon Our Interruption</title><script src="/fixture-challenge"></script></html>'
 PDF = b"%PDF-1.7\npublic test document"
+EMPTY_ATTACHMENT = b"<html><title>Attachment | Bibb County School District</title><body><form method='post'><input type='hidden' name='__VIEWSTATE' value='fixture'></form></body></html>"
 
 
 @pytest.fixture
@@ -739,7 +740,10 @@ def test_manual_network_scope(tmp_path, source, url, method, allowed):
 
 
 @pytest.mark.browser
-def test_manual_firefox_resumes_and_preserves_evidence(tmp_path, source, monkeypatch):
+@pytest.mark.parametrize("terminal_body", [PDF, EMPTY_ATTACHMENT])
+def test_manual_firefox_resumes_and_preserves_evidence(
+    tmp_path, source, monkeypatch, terminal_body
+):
     from playwright.sync_api import BrowserType
 
     source = SourceConfig.model_validate(
@@ -776,7 +780,7 @@ def test_manual_firefox_resumes_and_preserves_evidence(tmp_path, source, monkeyp
                 },
                 stream=Stream(b"ok"),
             )
-        body = PDF if "verified=yes" in request.headers.get("cookie", "") else html
+        body = terminal_body if "verified=yes" in request.headers.get("cookie", "") else html
         return httpx.Response(
             200,
             headers={"content-type": "application/pdf" if body == PDF else "text/html"},
@@ -785,12 +789,20 @@ def test_manual_firefox_resumes_and_preserves_evidence(tmp_path, source, monkeyp
 
     mock_network(monkeypatch, handler)
     f = SimbliFetcher(source, tmp_path, lambda b, e: captures.append((b, e)))
-    assert f.get(URL)[0] == PDF
+    assert f.get(URL)[0] == terminal_body
     assert launch_options[0]["headless"] is False
     assert len(calls) == 4
     assert any(e.direction == "request" and b == b"x" * 70000 for b, e in captures)
     assert f.session_cookies and f.session_user_agent
-    assert f.received_bytes == len(html) + len(script) + 2 + len(PDF)
+    assert f.received_bytes == len(html) + len(script) + 2 + len(terminal_body)
+    if terminal_body == EMPTY_ATTACHMENT:
+        from civpulse_updater.adapters.simbli import (
+            PublicDocumentUnavailable,
+            validate_document,
+        )
+
+        with pytest.raises(PublicDocumentUnavailable):
+            validate_document(terminal_body, "pdf")
 
 
 def test_manual_still_enforces_run_budget(tmp_path, source, monkeypatch):
@@ -840,3 +852,21 @@ def test_manual_meeting_page_scope_and_content(source):
     assert not recovered_content(target, b"<html>login</html>", manual)
     body = b"<html><script>var sToken='a';var enDID='b';var enMeetingID='c';</script></html>"
     assert recovered_content(target, body, manual)
+
+
+def test_empty_attachment_is_only_a_terminal_manual_response(source):
+    from civpulse_updater.simbli_browser import recovered_content
+
+    manual = source.model_copy(
+        update={"browser_headed": True, "browser_engine": "firefox"}
+    )
+    assert recovered_content(URL, EMPTY_ATTACHMENT, manual)
+    assert not recovered_content(URL, EMPTY_ATTACHMENT, source)
+    assert not recovered_content(URL, HTML, manual)
+    assert not recovered_content(URL, b"<html><title>Login</title></html>", manual)
+    assert not recovered_content(
+        URL, EMPTY_ATTACHMENT.replace(b"Bibb County", b"Other County"), manual
+    )
+    assert not recovered_content(
+        URL, EMPTY_ATTACHMENT.replace(b"</body>", b"Access denied</body>"), manual
+    )

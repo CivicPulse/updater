@@ -144,6 +144,26 @@ def recovered_content(url, body, config):
             for variable in ("sToken", "enDID", "enMeetingID")
         )
     if url != LISTING:
+        if (
+            config.browser_headed
+            and attachment_url(url)
+            and urlsplit(url).path == "/Meetings/Attachment.aspx"
+            and len(body) <= 16384
+            and not challenge(body)
+        ):
+            # After human verification a missing legacy attachment can return
+            # this empty official form. End the browser wait and retain cookies;
+            # normal document validation must still reject its HTML bytes.
+            html = BeautifulSoup(body, "html.parser")
+            title = "Attachment | Bibb County School District"
+            if (
+                html.title is not None
+                and html.title.get_text(" ", strip=True) == title
+                and html.get_text(" ", strip=True) == title
+                and html.find("form") is not None
+                and html.find(["iframe", "embed", "object", "a"]) is None
+            ):
+                return True
         return binary_document(body)
     if challenge(body):
         return False
