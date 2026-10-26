@@ -1,8 +1,10 @@
 """Public Bibb school-board records from Simbli (tenant 4013).
 
-Only observed public GET endpoints are used. Never evaluate upstream JavaScript.
+Use observed public GET endpoints and the constrained read-only archive POST.
+Never evaluate upstream JavaScript.
 """
 
+import copy
 import json
 import re
 from datetime import UTC, datetime
@@ -11,10 +13,20 @@ from zoneinfo import ZoneInfo
 
 from bs4 import BeautifulSoup
 
-from ..models import Document, Envelope, Event, Manifest, Reference, digest
+from ..models import (
+    Document,
+    Envelope,
+    Event,
+    ListingRequest,
+    Manifest,
+    Reference,
+    canonical,
+    digest,
+)
 
 BASE = "https://simbli.eboardsolutions.com"
 LISTING = BASE + "/SB_Meetings/SB_MeetingListing.aspx?S=4013"
+ARCHIVE = BASE + "/Services/api/GetMeetingListing"
 TYPES = {"Board Meeting", "Committee Meeting", "Work Session"}
 
 
@@ -80,10 +92,85 @@ def walk(items, child_key):
         queue[0:0] = array(item.get(child_key) or [])
 
 
+def public_tree(items, child_key, *, agenda=False):
+    """Omit explicitly restricted/deleted subtrees without requesting their details.
+
+    Unknown visibility values and malformed flags still fail closed. The raw
+    response remains private evidence; only this projection becomes a document.
+    """
+    count = 0
+    omitted = 0
+
+    def project(nodes, depth=0):
+        nonlocal count, omitted
+        if depth > 100:
+            raise ValueError("Simbli tree depth limit exceeded")
+        result = []
+        for raw in array(nodes):
+            item = obj(raw)
+            count += 1
+            if count > 2000:
+                raise ValueError("Simbli item limit exceeded")
+            visibility = item["Visibility"]
+            if type(visibility) is not int or visibility not in (0, 1, 2, 3):
+                raise ValueError("Unknown Simbli visibility")
+            if agenda and type(item["Deleted"]) is not bool:
+                raise ValueError("Invalid Simbli deletion flag")
+            if visibility != 0 or (agenda and item["Deleted"]):
+                omitted += 1
+                continue
+            item = copy.deepcopy(item)
+            item[child_key] = project(item.get(child_key) or [], depth + 1)
+            result.append(item)
+        return result
+
+    return project(items), omitted
+
+
+def public_document(role, body):
+    """Return source bytes unchanged unless a public projection is necessary."""
+    omitted = 0
+    if role not in ("Agenda", "Minutes"):
+        return body, omitted
+    document = obj(json.loads(body))
+    key, children = (
+        ("Items", "Children")
+        if role == "Agenda"
+        else ("LstItemMinutes", "ChildMinutesLst")
+    )
+    projected, omitted = public_tree(document[key], children, agenda=role == "Agenda")
+    if omitted:
+        document[key] = projected
+        return canonical(document).encode(), omitted
+    return body, 0
+
+
+def validate_document(body, extension):
+    if body[:256].lstrip().lower().startswith((b"<!doctype html", b"<html")):
+        raise PublicDocumentUnavailable("Public document returned an HTML page")
+    if extension == "json":
+        obj(json.loads(body))
+        return
+    signatures = {
+        "pdf": (b"%PDF-",),
+        "docx": (b"PK\x03\x04",),
+        "xlsx": (b"PK\x03\x04",),
+        "pptx": (b"PK\x03\x04",),
+        "doc": (bytes.fromhex("d0cf11e0a1b11ae1"),),
+        "xls": (bytes.fromhex("d0cf11e0a1b11ae1"),),
+        "ppt": (bytes.fromhex("d0cf11e0a1b11ae1"),),
+        "png": (b"\x89PNG\r\n\x1a\n",),
+        "jpg": (b"\xff\xd8\xff",),
+        "jpeg": (b"\xff\xd8\xff",),
+    }
+    if extension not in signatures or not body.startswith(signatures[extension]):
+        raise ValueError("Unexpected public attachment format")
+
+
 class Simbli:
     manifest = Manifest(
         name="simbli",
-        version="1.0.0",
+        version="1.1.0",
         capabilities=("meetings", "agendas", "minutes", "documents"),
     )
 
@@ -108,22 +195,59 @@ class Simbli:
 
     def start_urls(self, window):
         self.window = window
+        self.archive_context = None
+        self.listed_count = 0
+        self.listed_total = None
+        self.oldest_date = None
+        self.listed_ids = set()
         return [LISTING]
 
     def discover(self, content, url, sha):
-        if url != LISTING:
+        if url not in (LISTING, ARCHIVE):
             raise ValueError("Unexpected Simbli listing URL")
-        html = page(content)
-        marker = "ContentPlaceHolder1_MeetingGrid_newGrid.dataBuffer="
-        if marker not in html:
-            raise ValueError("Simbli listing structure missing")
-        rows, _ = json.JSONDecoder().raw_decode(html.split(marker, 1)[1].lstrip())
+        if url == LISTING:
+            html = page(content)
+            marker = "ContentPlaceHolder1_MeetingGrid_newGrid.dataBuffer="
+            if marker not in html:
+                raise ValueError("Simbli listing structure missing")
+            rows, _ = json.JSONDecoder().raw_decode(html.split(marker, 1)[1].lstrip())
+            if not hasattr(self, "listed_count"):
+                self.start_urls(self.window)
+            matches = re.findall(
+                r"var\s+meetingCustGrd\s*=\s*JSON.parse\('([^'\r\n]+)'\)", html
+            )
+            connections = re.findall(r"var\s+constr\s*=\s*'([^'\r\n]+)'", html)
+            if len(matches) == len(connections) == 1:
+                context = obj(json.loads(matches[0]))
+                context.update(
+                    ListingType=0,
+                    RecordCount=50,
+                    SortColName="DateTime",
+                    IsSortDesc=True,
+                    FilterExp=None,
+                    IsUserLoggedIn=False,
+                    SchoolID="4013",
+                    UserID="",
+                    TimeZone="0",
+                    ConnectionString=connections[0],
+                )
+                self.archive_context = context
+        else:
+            if not self.archive_context or not self.listed_count:
+                raise ValueError("Archive page without verified public listing context")
+            rows = json.loads(content)
         rows = array(rows)
+        if len(rows) > 50:
+            raise ValueError("Unexpected Simbli archive page size")
         refs, dates = [], []
         for raw in rows:
             row = obj(raw)
             if row["MM_DistrictID"] != 4013:
                 raise ValueError("Wrong Simbli district")
+            mid = identifier(row["Master_MeetingID"])
+            if mid in self.listed_ids:
+                raise ValueError("Duplicate Simbli listing identity; archive changed")
+            self.listed_ids.add(mid)
             start = self.local_time(row["DateTime"])
             dates.append(start.date())
             if row["ML_TypeTitle"] not in TYPES:
@@ -149,21 +273,46 @@ class Simbli:
                     minutes_published=row["MinutesStatus"] == "PUBLISHED",
                 )
             )
-        # The public initial page is descending and limited to 50 rows. Older
-        # pagination requires POST/session state; don't claim a complete backfill.
+        following = []
         if rows:
             total = rows[0]["MeetingsCount"]
-            if type(total) is not int or total < len(rows):
+            if type(total) is not int or total < self.listed_count + len(rows):
                 raise ValueError("Invalid listing count")
-            if dates != sorted(dates, reverse=True):
+            if any(
+                type(row["MeetingsCount"]) is not int or row["MeetingsCount"] != total
+                for row in rows
+            ):
+                raise ValueError("Inconsistent Simbli listing counts")
+            if self.listed_total is not None and total != self.listed_total:
+                raise ValueError("Simbli listing count changed during pagination")
+            if dates != sorted(dates, reverse=True) or (
+                self.oldest_date is not None and max(dates) > self.oldest_date
+            ):
                 raise ValueError("Unexpected listing order")
-            if total > len(rows) and self.window and self.window.start <= min(dates):
-                raise ListingCoverageError(
-                    "Requested window exceeds public initial listing coverage"
+            self.listed_count += len(rows)
+            self.listed_total = total
+            self.oldest_date = min(dates)
+            if (
+                total > self.listed_count
+                and self.window
+                and self.window.start <= min(dates)
+            ):
+                if not self.archive_context:
+                    raise ListingCoverageError(
+                        "Historical listing coverage requires public archive context"
+                    )
+                following.append(
+                    ListingRequest(
+                        url=ARCHIVE,
+                        content=canonical(
+                            self.archive_context
+                            | {"RecordStart": self.listed_count + 1}
+                        ).encode(),
+                    )
                 )
-        elif "No Meetings Found." not in html:
+        elif url == ARCHIVE or "No Meetings Found." not in html:
             raise ValueError("Unverified empty listing")
-        return refs, []
+        return refs, following
 
     def context(self, content, ref):
         query = parse_qs(urlsplit(ref.url).query)
@@ -277,9 +426,8 @@ class Simbli:
             for a in array(data(support_url)["Attachment"]):
                 attachment(a)
         if tree_url in saved:
-            for item in walk(data(tree_url)["Items"], "Children"):
-                if item["Visibility"] != 0 or item["Deleted"] is not False:
-                    raise ValueError("Non-public agenda item")
+            public, _ = public_tree(data(tree_url)["Items"], "Children", agenda=True)
+            for item in walk(public, "Children"):
                 iid = identifier(item["AgendaID"])
                 detail_url = self.api(
                     "MeetingView/GetMeetingItemDetailsModel",
@@ -319,15 +467,33 @@ class Simbli:
                 meeting_minutes = obj(minutes["MeetingMinutes"])
                 for a in array(meeting_minutes.get("Attachments") or []):
                     attachment(a, "Minutes Attachment", "Meeting")
-                for item in walk(minutes["LstItemMinutes"], "ChildMinutesLst"):
-                    if item["Visibility"] != 0:
-                        raise ValueError("Non-public minutes")
+                public, _ = public_tree(minutes["LstItemMinutes"], "ChildMinutesLst")
+                for item in walk(public, "ChildMinutesLst"):
                     for a in array(item.get("Attachments") or []):
                         attachment(a, "Minutes Attachment", "Agenda")
         return list(dict.fromkeys(required)), documents, metadata
 
     def resources_for(self, content, ref, resources):
         return self.plan(content, ref, resources)[0]
+
+    def materialized_documents(self, content, ref, resources):
+        _, definitions, _ = self.plan(content, ref, resources)
+        return [
+            public_document(role, resources[url])[0]
+            for _, role, url, _ in definitions.values()
+        ]
+
+    def validate_resource(self, content, ref, resources, url, body):
+        _, definitions, _ = self.plan(content, ref, resources)
+        extension = next(
+            (
+                extension
+                for _, _, target, extension in definitions.values()
+                if target == url
+            ),
+            "json",
+        )
+        validate_document(body, extension)
 
     def parse_bundle(self, content, ref, sha, window, resources):
         required, definitions, metadata = self.plan(content, ref, resources)
@@ -337,26 +503,14 @@ class Simbli:
         if not window.start <= start.date() <= window.end:
             return []
         documents = []
+        omitted = 0
         for key, (title, role, url, extension) in sorted(definitions.items()):
             body = resources[url]
-            if body.lstrip().lower().startswith((b"<!doctype html", b"<html")):
-                raise PublicDocumentUnavailable("Public document returned an HTML page")
-            if extension == "json":
-                obj(json.loads(body))
-            elif extension == "pdf":
-                if not body.startswith(b"%PDF-"):
-                    raise ValueError("Expected PDF attachment")
-            elif extension in ("docx", "xlsx", "pptx"):
-                if not body.startswith(b"PK\x03\x04"):
-                    raise ValueError("Expected Office attachment")
-            elif extension in ("doc", "xls", "ppt"):
-                if not body.startswith(bytes.fromhex("d0cf11e0a1b11e1")):
-                    raise ValueError("Expected Office binary attachment")
-            elif extension in ("png", "jpg", "jpeg"):
-                if not body.startswith((b"\x89PNG\r\n\x1a\n", b"\xff\xd8\xff")):
-                    raise ValueError("Expected image attachment")
-            else:
-                raise ValueError("Unsupported attachment format")
+            validate_document(body, extension)
+            body, hidden = public_document(role, body)
+            omitted += hidden
+            if hidden:
+                title += " (public projection)"
             # Session tokens stay only in raw local evidence, never proposals.
             public_url = (
                 ref.url + ("&T=1" if role == "Minutes" else "")
@@ -374,6 +528,11 @@ class Simbli:
                 )
             )
         warnings = []
+        if omitted:
+            warnings.append(
+                f"Excluded {omitted} restricted or deleted agenda/minutes subtrees; "
+                "documents with exclusions are public projections. Raw evidence stays private."
+            )
         if metadata["IsPublished"] is False:
             warnings.append("Agenda is not yet published; schedule only.")
         if not ref.minutes_published:

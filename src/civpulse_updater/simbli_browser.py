@@ -18,7 +18,7 @@ from urllib.parse import parse_qs, urljoin, urlsplit
 from bs4 import BeautifulSoup
 from loguru import logger
 
-from .adapters.simbli import LISTING, Simbli
+from .adapters.simbli import ARCHIVE, LISTING, Simbli
 from .models import Evidence, digest
 from .transport import Fetcher, FetchError, validate_url
 
@@ -30,8 +30,59 @@ MAX_BROWSER_ATTEMPTS_PER_RUN = 5
 MAX_BROWSER_REQUESTS = 12
 BROWSER_SECONDS = 45
 MAX_RUN_REQUESTS = 120
+MAX_SYSTEMATIC_REQUESTS = 2000
 MAX_SCRIPT_BYTES = 2_000_000
 MANUAL_SECONDS = 600
+
+
+def validate_archive_request(content):
+    """No caller-supplied filter expressions, identities, or write operations."""
+    if not isinstance(content, bytes) or len(content) > 16384:
+        raise FetchError("Invalid public archive request")
+    try:
+        data = json.loads(content)
+        fixed = {
+            "ListingType": 0,
+            "CustomSort": 0,
+            "SortColName": "DateTime",
+            "IsSortDesc": True,
+            "RecordCount": 50,
+            "FilterExp": None,
+            "ParentGroup": None,
+            "IsUserLoggedIn": False,
+            "UserID": "",
+            "UserRole": None,
+            "EncUserId": None,
+            "HasAutoAuthAccess": False,
+            "Id": 0,
+            "SchoolID": "4013",
+            "TimeZone": "0",
+            "CreatedOn": "0001-01-01T00:00:00",
+            "CreatedBy": None,
+            "ModifiedOn": "0001-01-01T00:00:00",
+            "ModifiedBy": None,
+            "DeletedBy": None,
+            "DeletedOnUTC": None,
+            "IsDeleted": False,
+        }
+        if not isinstance(data, dict) or set(data) != set(fixed) | {
+            "RecordStart",
+            "ConnectionString",
+            "SecurityToken",
+        }:
+            raise ValueError
+        if any(type(data[k]) is not type(v) or data[k] != v for k, v in fixed.items()):
+            raise ValueError
+        start = data["RecordStart"]
+        if type(start) is not int or not 51 <= start <= 2451 or (start - 1) % 50:
+            raise ValueError
+        if any(
+            not isinstance(data[k], str) or not 1 <= len(data[k]) <= 4096
+            for k in ("ConnectionString", "SecurityToken")
+        ):
+            raise ValueError
+    except (ValueError, KeyError, TypeError, UnicodeDecodeError) as error:
+        raise FetchError("Invalid public archive request") from error
 
 
 def manual_host(url):
@@ -234,7 +285,12 @@ class SimbliFetcher(Fetcher):
                     "request_interval": max(
                         MIN_REQUEST_INTERVAL, config.request_interval
                     ),
-                    "max_requests": min(MAX_RUN_REQUESTS, config.max_requests),
+                    "max_requests": min(
+                        MAX_SYSTEMATIC_REQUESTS
+                        if config.systematic
+                        else MAX_RUN_REQUESTS,
+                        config.max_requests,
+                    ),
                 }
             )
         )
@@ -249,6 +305,9 @@ class SimbliFetcher(Fetcher):
         self.session_user_agent = None
 
     def validate_request(self, url, method, content):
+        if method == "POST" and url == ARCHIVE and not self.in_browser:
+            validate_archive_request(content)
+            return validate_url(url, (HOST,))
         if self.config.browser_headed and self.in_browser:
             host = manual_host(url)
             if method == "GET" and content is None:
@@ -263,6 +322,36 @@ class SimbliFetcher(Fetcher):
                 return host
             raise FetchError("Unsupported manual verification request")
         return super().validate_request(url, method, content)
+
+    def get_listing_page(self, request):
+        """The sole civic POST is the observed public, read-only archive query."""
+        if request.url != ARCHIVE:
+            raise FetchError("Unsupported listing POST destination")
+        validate_archive_request(request.content)
+        self.policy.check()
+        self.capture(
+            request.content,
+            Evidence(
+                method="POST",
+                direction="request",
+                sha256=digest(request.content),
+                url=ARCHIVE,
+                media_type="application/json",
+                size=len(request.content),
+                fetched_at=datetime.now(UTC),
+            ),
+        )
+        body, evidence, status, headers = self.exchange(
+            ARCHIVE,
+            method="POST",
+            content=request.content,
+            headers={"content-type": "application/json"},
+        )
+        if status != 200 or challenge(body):
+            self.capture(body, evidence)
+            self.policy.defer(headers.get("retry-after"))
+            raise FetchError("Public archive query unavailable; defer collection")
+        return body, evidence
 
     def before_request(self, deadline=None):
         self.policy.pace(deadline)

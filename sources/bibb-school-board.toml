@@ -4,7 +4,7 @@ url = "https://simbli.eboardsolutions.com/SB_Meetings/SB_MeetingListing.aspx?S=4
 allowed_hosts = ["simbli.eboardsolutions.com"]
 timezone = "America/New_York"
 mode = "review-only"
-max_pages = 1
+max_pages = 5
 max_events = 15
 max_resources = 250
 max_bytes = 100000000

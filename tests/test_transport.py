@@ -67,6 +67,38 @@ def test_size_limit(monkeypatch, config):
         Fetcher(config.model_copy(update={"max_bytes": 1024})).get(config.url)
 
 
+def test_advertised_size_reports_safe_numeric_limit(monkeypatch, config):
+    from civpulse_updater.transport import ResponseLimitError
+
+    install_transport(
+        monkeypatch,
+        lambda _: httpx.Response(
+            200, headers={"content-length": "100000001"}, stream=Stream()
+        ),
+    )
+    with pytest.raises(ResponseLimitError) as result:
+        Fetcher(config).get(config.url)
+    assert result.value.expected == 100000001
+    assert not result.value.aggregate
+    assert "https://" not in str(result.value)
+
+
+def test_advertised_aggregate_limit_is_distinguished(monkeypatch, config):
+    from civpulse_updater.transport import ResponseLimitError
+
+    install_transport(
+        monkeypatch,
+        lambda _: httpx.Response(
+            200, headers={"content-length": "1500"}, stream=Stream()
+        ),
+    )
+    fetcher = Fetcher(config.model_copy(update={"max_total_bytes": 2000}))
+    fetcher.received_bytes = 1000
+    with pytest.raises(ResponseLimitError) as result:
+        fetcher.get(config.url)
+    assert result.value.aggregate and result.value.limit == 1000
+
+
 def test_valid_transfer(monkeypatch, config):
     install_transport(monkeypatch, lambda _: httpx.Response(200, stream=Stream()))
     body, evidence = Fetcher(config).get(config.url)

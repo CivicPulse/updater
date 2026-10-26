@@ -130,8 +130,35 @@ def collect(
             help="Open Firefox for manual CAPTCHA verification; rate and download limits apply.",
         ),
     ] = False,
+    systematic: Annotated[
+        bool,
+        typer.Option(
+            "--systematic",
+            help="Bibb archive capture: bounded 2,000 requests, 100 meetings, 500 MB/file and 10 GB/run; normal pacing remains.",
+        ),
+    ] = False,
+    resume_run: Annotated[
+        str | None,
+        typer.Option(
+            "--resume-run",
+            help="Continue the saved meeting/resource checkpoints from this run; source and dates must match.",
+        ),
+    ] = None,
 ):
     config = load_source(settings.sources_dir, source)
+    if systematic:
+        config = type(config).model_validate(
+            config.model_dump()
+            | {
+                "systematic": True,
+                "max_requests": 2000,
+                "max_pages": 10,
+                "max_events": 100,
+                "max_resources": 5000,
+                "max_bytes": 500_000_000,
+                "max_total_bytes": 10_000_000_000,
+            }
+        )
     if browser_fallback or browser is not None or headed:
         config = type(config).model_validate(
             config.model_dump()
@@ -147,7 +174,11 @@ def collect(
     window = Window(start=date.fromisoformat(start), end=date.fromisoformat(end))
     with local_state() as state:
         result = collect_run(
-            state, EvidenceStore(settings.state_dir / "evidence"), config, window
+            state,
+            EvidenceStore(settings.state_dir / "evidence"),
+            config,
+            window,
+            resume_run=resume_run,
         )
     emit(result)
     if result["status"] != "complete":

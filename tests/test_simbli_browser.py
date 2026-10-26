@@ -61,6 +61,104 @@ def no_pacing(monkeypatch):
     monkeypatch.setattr("civpulse_updater.transport.Fetcher.before_request", reserve)
 
 
+def archive_body(**updates):
+    import json
+
+    data = json.loads(
+        (Path(__file__).parent / "fixtures/simbli/archive-context.json").read_text()
+    )
+    data.update(
+        ListingType=0,
+        TimeZone="0",
+        SortColName="DateTime",
+        IsSortDesc=True,
+        RecordStart=51,
+        RecordCount=50,
+        FilterExp=None,
+        IsUserLoggedIn=False,
+        UserID="",
+        SchoolID="4013",
+        ConnectionString="fixture-public-connection",
+    )
+    data.update(updates)
+    return json.dumps(data).encode()
+
+
+def test_archive_post_is_pinned_paced_and_captures_request(
+    tmp_path, source, monkeypatch
+):
+    from civpulse_updater.adapters.simbli import ARCHIVE
+    from civpulse_updater.models import ListingRequest
+
+    no_pacing(monkeypatch)
+    calls = []
+    captures = []
+
+    def handler(request):
+        calls.append(request)
+        assert (
+            request.method == "POST"
+            and request.url.path == "/Services/api/GetMeetingListing"
+        )
+        assert request.headers["host"] == "simbli.eboardsolutions.com"
+        assert request.extensions["sni_hostname"] == "simbli.eboardsolutions.com"
+        assert request.content == archive_body()
+        return httpx.Response(
+            200, headers={"content-type": "application/json"}, stream=Stream(b"[]")
+        )
+
+    mock_network(monkeypatch, handler)
+    f = SimbliFetcher(source, tmp_path, lambda b, e: captures.append((b, e)))
+    body, evidence = f.get_listing_page(
+        ListingRequest(url=ARCHIVE, content=archive_body())
+    )
+    assert body == b"[]" and evidence.method == "POST" and f.requests == 1
+    assert captures[0][1].direction == "request" and captures[0][0] == archive_body()
+    f.in_browser = True
+    with pytest.raises(FetchError):
+        f.validate_request(ARCHIVE, "POST", archive_body())
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize(
+    "updates",
+    [
+        {"SchoolID": "9999"},
+        {"IsUserLoggedIn": True},
+        {"UserID": "another-user"},
+        {"FilterExp": "untrusted expression"},
+        {"RecordCount": 5000},
+        {"RecordStart": 0},
+        {"RecordStart": True},
+        {"Save": True},
+        {"Id": 1},
+    ],
+)
+def test_archive_post_rejects_non_public_or_unbounded_queries(
+    tmp_path, source, updates
+):
+    from civpulse_updater.adapters.simbli import ARCHIVE
+
+    f = SimbliFetcher(source, tmp_path, lambda *_: None)
+    with pytest.raises(FetchError, match="archive request"):
+        f.validate_request(ARCHIVE, "POST", archive_body(**updates))
+    assert f.requests == 0
+
+
+def test_systematic_request_budget_keeps_normal_cap(tmp_path, source):
+    normal = SimbliFetcher(
+        source.model_copy(update={"max_requests": 5000}), tmp_path, lambda *_: None
+    )
+    systematic = SimbliFetcher(
+        source.model_copy(update={"systematic": True, "max_requests": 5000}),
+        tmp_path,
+        lambda *_: None,
+    )
+    assert normal.config.max_requests == 120
+    assert systematic.config.max_requests == 2000
+    assert systematic.config.request_interval >= 1
+
+
 @pytest.mark.parametrize(
     "url",
     [

@@ -35,3 +35,9 @@ Only fields needed for parser fixtures are retained. No session token or complet
 upstream page is committed. Fixture fetchers supply synthetic page parameters,
 item-content models and binary attachments. These substitutions are explicit in
 the tests; live collection verification is documented separately.
+
+`simbli/archive-context.json` is synthetic anonymous grid context shaped like the
+public October 26 listing. Its token and connection values are placeholders.
+Pagination tests generate a second historical page and verify the pinned,
+read-only POST contract, coverage, duplicate detection and offline replay. No
+real session context is stored in the fixture.

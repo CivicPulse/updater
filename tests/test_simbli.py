@@ -254,6 +254,240 @@ def test_corrupt_document_blocks_replay(tmp_path, source, window):
     assert replay(state, store, result["run_id"])["status"] == "failed"
 
 
+def test_restricted_agenda_subtree_keeps_public_meeting(tmp_path, source, window):
+    feed = Feed()
+    hidden = copy.deepcopy(feed.tree["Items"][0])
+    hidden.update(
+        ID="private-root",
+        AgendaID=999991,
+        Visibility=3,
+        Title="PRIVATE CONTENT MUST NOT BE PROPOSED",
+    )
+    child = copy.deepcopy(feed.tree["Items"][0])
+    child.update(ID="private-child", AgendaID=999992)
+    hidden["Children"] = [child]
+    feed.tree["Items"].append(hidden)
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    result = collect(state, store, source, window, feed)
+    assert result["status"] == "complete" and result["records"] == 1
+    assert not any("private-root" in u or "private-child" in u for u in feed.calls)
+    event = json.loads(state.rows("SELECT payload FROM records")[0]["payload"])
+    agenda = next(d for d in event["documents"] if d["role"] == "Agenda")
+    projected = store.read(agenda["sha256"])
+    assert b"PRIVATE CONTENT" not in projected and b"private-child" not in projected
+    assert len(json.loads(projected)["Items"]) == len(feed.tree["Items"]) - 1
+    assert "public projection" in agenda["title"]
+    assert any("Excluded 1" in w for w in event["warnings"])
+    assert b"PRIVATE CONTENT" in store.read(digest(json.dumps(feed.tree).encode()))
+    assert replay(state, store, result["run_id"])["proposed_changes"] == 0
+
+
+def test_restricted_minutes_subtree_never_downloads_attachments(
+    tmp_path, source, window
+):
+    feed = Feed()
+    hidden = copy.deepcopy(feed.minutes["LstItemMinutes"][0])
+    hidden.update(
+        Visibility=3, Attachments=[dict(feed.attachment, AttachmentID=999991)]
+    )
+    feed.minutes["LstItemMinutes"].append(hidden)
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    result = collect(state, store, source, window, feed)
+    assert result["status"] == "complete"
+    assert not any("999991" in url for url in feed.calls)
+    event = json.loads(state.rows("SELECT payload FROM records")[0]["payload"])
+    minutes = next(d for d in event["documents"] if d["role"] == "Minutes")
+    assert (
+        len(json.loads(store.read(minutes["sha256"]))["LstItemMinutes"])
+        == len(feed.minutes["LstItemMinutes"]) - 1
+    )
+
+
+def test_unknown_outline_visibility_still_fails_closed(tmp_path, source, window):
+    feed = Feed()
+    feed.tree["Items"][0]["Visibility"] = 99
+    state = State(tmp_path)
+    assert (
+        collect(state, EvidenceStore(tmp_path / "evidence"), source, window, feed)[
+            "status"
+        ]
+        == "failed"
+    )
+    assert not state.rows("SELECT * FROM records")
+
+
+def test_archive_pagination_collects_early_year_and_replays(tmp_path, source):
+    from civpulse_updater.adapters.simbli import ARCHIVE
+    from civpulse_updater.simbli_browser import validate_archive_request
+
+    class ArchiveFeed(Feed):
+        def __init__(self):
+            super().__init__()
+            original = copy.deepcopy(self.rows[1])
+            self.historical = dict(
+                original, DateTime="01/15/2026 - 11:00 AM", MeetingsCount=51
+            )
+            self.rows = [
+                dict(
+                    original,
+                    Master_MeetingID=200000 + i,
+                    DateTime="03/05/2026 - 09:00 AM",
+                    ML_TypeTitle="School Council",
+                    MeetingsCount=51,
+                )
+                for i in range(50)
+            ]
+            self.meeting["TitleDateTime"] = self.historical["DateTime"]
+
+        def get(self, url):
+            body, meta = super().get(url)
+            if url == LISTING:
+                body += (
+                    "var meetingCustGrd = JSON.parse('"
+                    + json.dumps(fixture("archive-context.json"))
+                    + "'); var constr = 'fixture-public-connection';"
+                ).encode()
+                meta = meta.model_copy(
+                    update={"sha256": digest(body), "size": len(body)}
+                )
+            return body, meta
+
+        def get_listing_page(self, request):
+            assert request.url == ARCHIVE
+            validate_archive_request(request.content)
+            assert json.loads(request.content)["RecordStart"] == 51
+            self.calls.append(ARCHIVE)
+            body = json.dumps([self.historical]).encode()
+            return body, Evidence(
+                method="POST",
+                url=ARCHIVE,
+                sha256=digest(body),
+                size=len(body),
+                media_type="application/json",
+                fetched_at=datetime.now(UTC),
+            )
+
+    feed = ArchiveFeed()
+    window = Window(start=date(2026, 1, 1), end=date(2026, 12, 31))
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    result = collect(state, store, source, window, feed)
+    assert result["status"] == "complete" and result["records"] == 1
+    event = json.loads(state.rows("SELECT payload FROM records")[0]["payload"])
+    assert event["starts_at"].startswith("2026-01-15")
+    assert ARCHIVE in feed.calls
+    assert replay(state, store, result["run_id"])["proposed_changes"] == 0
+
+
+def test_archive_rejects_duplicate_rows(source):
+    from civpulse_updater.adapters.simbli import ARCHIVE
+
+    adapter = Simbli(source)
+    adapter.start_urls(Window(start=date(2026, 1, 1), end=date(2026, 12, 31)))
+    rows = fixture("listing.json")
+    body = (
+        "ContentPlaceHolder1_MeetingGrid_newGrid.dataBuffer="
+        + json.dumps(rows)
+        + ";var meetingCustGrd = JSON.parse('"
+        + json.dumps(fixture("archive-context.json"))
+        + "');var constr = 'fixture-connection';"
+    ).encode()
+    _, following = adapter.discover(body, LISTING, digest(body))
+    assert following
+    with pytest.raises(ValueError, match="Duplicate"):
+        adapter.discover(json.dumps([rows[-1]]).encode(), ARCHIVE, "a" * 64)
+
+
+def test_resume_uses_verified_checkpoints_without_repeating_downloads(
+    tmp_path, source, window
+):
+    feed = Feed()
+    feed.fail = True
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    first = collect(state, store, source, window, feed)
+    assert first["status"] == "failed"
+    previous = state.rows("SELECT * FROM runs WHERE id=:id", id=first["run_id"])[0]
+    checkpoint = json.loads(previous["inputs"])[0]
+    assert checkpoint["complete"] is False and checkpoint["resources"]
+    used = set(checkpoint["resources"]) | {LISTING, checkpoint["reference"]["url"]}
+    second = Feed()
+    result = collect(state, store, source, window, second, resume_run=first["run_id"])
+    assert result["status"] == "complete" and result["records"] == 1
+    assert not used.intersection(second.calls)
+    assert all("Attachment.aspx" in u for u in second.calls)
+    record = state.rows("SELECT observed_at FROM records")[0]
+    assert record["observed_at"] == previous["started_at"]
+    assert replay(state, store, result["run_id"])["proposed_changes"] == 0
+
+
+def test_resume_rejects_corruption_before_network(tmp_path, source, window):
+    feed = Feed()
+    feed.fail = True
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    first = collect(state, store, source, window, feed)
+    checkpoint = json.loads(
+        state.rows("SELECT inputs FROM runs WHERE id=:id", id=first["run_id"])[0][
+            "inputs"
+        ]
+    )[0]
+    store.path(next(iter(checkpoint["resources"].values()))).write_bytes(b"corrupt")
+    second = Feed()
+    with pytest.raises(ValueError, match="checksum"):
+        collect(state, store, source, window, second, resume_run=first["run_id"])
+    assert not second.calls
+
+
+def test_invalid_download_is_evidence_but_not_a_resume_checkpoint(
+    tmp_path, source, window
+):
+    feed = Feed()
+    feed.pdf = b"<html>temporary unavailable page</html>"
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    first = collect(state, store, source, window, feed)
+    assert first["status"] == "failed"
+    entry = json.loads(
+        state.rows("SELECT inputs FROM runs WHERE id=:id", id=first["run_id"])[0][
+            "inputs"
+        ]
+    )[0]
+    assert digest(feed.pdf) not in entry["resources"].values()
+    assert store.read(digest(feed.pdf)) == feed.pdf
+    assert (
+        collect(state, store, source, window, Feed(), resume_run=first["run_id"])[
+            "status"
+        ]
+        == "complete"
+    )
+
+
+def test_resume_cannot_erase_incomplete_discovery(tmp_path, source, window):
+    feed = Feed()
+    source = source.model_copy(update={"max_events": 1})
+    # Two distinct public meeting references exceed the event limit.
+    feed.rows.insert(2, dict(feed.rows[1], Master_MeetingID=138068))
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    first = collect(state, store, source, window, feed)
+    assert any(e["code"] == "event_limit" for e in first["errors"])
+    with pytest.raises(ValueError, match="discovery"):
+        collect(state, store, source, window, Feed(), resume_run=first["run_id"])
+
+
+def test_resuming_old_snapshot_cannot_supersede_newer_observation(
+    tmp_path, source, window
+):
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    old = Feed()
+    old.fail = True
+    first = collect(state, store, source, window, old)
+    latest = Feed()
+    latest.pdf += b" newer revision"
+    assert collect(state, store, source, window, latest)["status"] == "complete"
+    before = state.rows("SELECT * FROM records")[0]
+    result = collect(state, store, source, window, Feed(), resume_run=first["run_id"])
+    assert result["status"] == "complete" and result["skipped_stale"] == 1
+    assert result["proposed_changes"] == 0
+    assert state.rows("SELECT * FROM records")[0] == before
+
+
 def test_minutes_attachment_download(tmp_path, source, window):
     feed = Feed()
     feed.minutes["MeetingMinutes"]["Attachments"] = [copy.deepcopy(feed.attachment)]
@@ -271,6 +505,17 @@ def test_office_attachment_is_preserved_without_execution(tmp_path, source, wind
     state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
     assert collect(state, store, source, window, feed)["status"] == "complete"
     assert store.read(digest(feed.pdf)) == feed.pdf
+
+
+@pytest.mark.parametrize("extension", ["doc", "xls", "ppt"])
+def test_legacy_office_signature_is_validated(tmp_path, source, window, extension):
+    feed = Feed()
+    feed.attachment["FileName"] = "document." + extension
+    feed.pdf = bytes.fromhex("d0cf11e0a1b11ae1") + b"inert legacy fixture"
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    assert collect(state, store, source, window, feed)["status"] == "complete"
+    feed.pdf = b"not an Office document"
+    assert collect(state, store, source, window, feed)["status"] == "failed"
 
 
 def test_unknown_attachment_type_stops_before_download(tmp_path, source, window):

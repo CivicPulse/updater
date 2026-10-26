@@ -21,6 +21,18 @@ class FetchError(ValueError):
         self.delay = delay
 
 
+class ResponseLimitError(FetchError):
+    """Safe numeric diagnostics without session URLs or response contents."""
+
+    def __init__(self, limit, expected=None, *, aggregate=False):
+        self.limit = limit
+        self.expected = expected
+        self.aggregate = aggregate
+        kind = "total" if aggregate else "response"
+        size = f"; advertised bytes={expected}" if expected is not None else ""
+        super().__init__(f"Response exceeds {kind} byte limit ({limit}{size})")
+
+
 def validate_url(url: str, hosts: tuple[str, ...]) -> str:
     parsed = urlsplit(url)
     if (
@@ -144,13 +156,17 @@ class Fetcher:
                     ):
                         raise FetchError("Compressed response rejected")
                     length = response.headers.get("content-length")
-                    if (
-                        length
-                        and length.isdigit()
-                        and int(length)
-                        > min(limit, self.config.max_total_bytes - self.received_bytes)
-                    ):
-                        raise FetchError("Response exceeds byte limit")
+                    if length and length.isdigit():
+                        advertised = int(length)
+                        if advertised > limit:
+                            raise ResponseLimitError(limit, advertised)
+                        remaining_bytes = (
+                            self.config.max_total_bytes - self.received_bytes
+                        )
+                        if advertised > remaining_bytes:
+                            raise ResponseLimitError(
+                                remaining_bytes, advertised, aggregate=True
+                            )
                     data = bytearray()
                     for chunk in (
                         response.iter_raw(chunk_size=65536)
@@ -160,7 +176,7 @@ class Fetcher:
                         self.consume(len(chunk))
                         data.extend(chunk)
                         if len(data) > limit:
-                            raise FetchError("Response exceeds byte limit")
+                            raise ResponseLimitError(limit)
                         if time.monotonic() > deadline:
                             raise FetchError("Response exceeds duration limit")
                     body = bytes(data)

@@ -27,17 +27,20 @@ class SourceConfig(Model):
     browser_fallback: bool = False
     browser_engine: Literal["chromium", "firefox"] = "chromium"
     browser_headed: bool = False
+    systematic: bool = False
     max_requests: int = Field(default=500, ge=1, le=5000)
     max_pages: int = Field(default=10, ge=1, le=50)
     max_events: int = Field(default=150, ge=1, le=500)
-    max_bytes: int = Field(default=2_000_000, ge=1024, le=100_000_000)
-    max_total_bytes: int = Field(default=100_000_000, ge=1024, le=1_000_000_000)
-    max_resources: int = Field(default=100, ge=1, le=500)
+    max_bytes: int = Field(default=2_000_000, ge=1024, le=500_000_000)
+    max_total_bytes: int = Field(default=100_000_000, ge=1024, le=10_000_000_000)
+    max_resources: int = Field(default=100, ge=1, le=5000)
     request_interval: float = Field(default=0.25, ge=0.25, le=10)
     enabled_plugins: tuple[str, ...] = ()
 
     @model_validator(mode="after")
     def browser_scope(self):
+        if self.systematic and self.adapter != "simbli":
+            raise ValueError("Systematic capture is restricted to Simbli")
         if self.browser_headed and (
             not self.browser_fallback or self.browser_engine != "firefox"
         ):
@@ -84,6 +87,13 @@ class Reference(Model):
     displayed_start: str | None = None
     displayed_end: str | None = None
     description: str | None = None
+
+
+class ListingRequest(Model):
+    """Private, bounded read-only listing request; never a publication action."""
+
+    url: str
+    content: bytes
 
 
 class Evidence(Model):

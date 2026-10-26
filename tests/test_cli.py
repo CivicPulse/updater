@@ -105,7 +105,7 @@ def test_logs_do_not_expose_credentials(tmp_path):
 def test_browser_selection_is_explicit_and_validated(tmp_path, monkeypatch):
     seen = []
 
-    def fake_collect(state, store, config, window):
+    def fake_collect(state, store, config, window, **kwargs):
         seen.append(config)
         return {"status": "complete"}
 
@@ -136,7 +136,7 @@ def test_headed_implies_firefox_fallback_and_rejects_other_sources(
     seen = []
     monkeypatch.setattr(
         "civpulse_updater.cli.collect_run",
-        lambda state, store, config, window: (
+        lambda state, store, config, window, **kwargs: (
             seen.append(config) or {"status": "complete"}
         ),
     )
@@ -158,3 +158,40 @@ def test_headed_implies_firefox_fallback_and_rejects_other_sources(
     args[3] = "bibb-democrats"
     assert runner.invoke(app, args).exit_code == 2
     assert len(seen) == 1
+
+
+def test_systematic_profile_is_explicit_and_scoped(tmp_path, monkeypatch):
+    seen = []
+
+    def capture(state, store, config, window, **kwargs):
+        seen.append((config, kwargs))
+        return {"status": "complete"}
+
+    monkeypatch.setattr("civpulse_updater.cli.collect_run", capture)
+    args = [
+        "--state-dir",
+        str(tmp_path),
+        "collect",
+        "bibb-school-board",
+        "--from",
+        "2026-01-01",
+        "--to",
+        "2026-12-31",
+    ]
+    assert runner.invoke(app, args).exit_code == 0
+    assert not seen[-1][0].systematic and seen[-1][0].max_bytes == 100_000_000
+    assert (
+        runner.invoke(
+            app, args + ["--systematic", "--resume-run", "fixture-run"]
+        ).exit_code
+        == 0
+    )
+    config, kw = seen[-1]
+    assert (
+        config.systematic and config.max_requests == 2000 and config.max_events == 100
+    )
+    assert config.max_bytes == 500_000_000 and config.max_total_bytes == 10_000_000_000
+    assert config.request_interval == 1 and kw["resume_run"] == "fixture-run"
+    args[3] = "bibb-democrats"
+    assert runner.invoke(app, args + ["--systematic"]).exit_code == 2
+    assert len(seen) == 2

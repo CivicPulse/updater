@@ -27,9 +27,19 @@ def probe(
     )
     adapter = Simbli(config)
     candidates = {}
+    challenged = {}
+    for row in state.rows("SELECT metadata FROM evidence WHERE run_id=:id", id=run_id):
+        metadata = json.loads(row["metadata"])
+        url = metadata["url"]
+        if metadata.get("direction", "response") == "response" and attachment_url(url):
+            body = store.read(metadata["sha256"])
+            if challenge(body):
+                challenged[url] = body
     for entry in json.loads(previous["inputs"]):
         ref = Reference.model_validate(entry["reference"])
         store.read(ref.listing_hash)
+        if not entry.get("sha256"):
+            continue
         resources = {
             url: store.read(sha) for url, sha in entry.get("resources", {}).items()
         }
@@ -38,8 +48,10 @@ def probe(
             if (
                 role in ("Attachment", "Minutes Attachment")
                 and attachment_url(url)
-                and url in resources
-                and challenge(resources[url])
+                and (
+                    url in challenged
+                    or (url in resources and challenge(resources[url]))
+                )
             ):
                 candidates[url] = True
     targets = sorted(candidates)

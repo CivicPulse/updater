@@ -208,7 +208,12 @@ agenda can produce a schedule-only proposal with a warning.
 
 Agendas are preserved as the official structured JSON tree plus each item's
 content model; published minutes are preserved as the official JSON document,
-including its HTML text. Original PDF, Office, PNG and JPEG attachments are
+including its HTML text. Explicitly restricted/deleted agenda and minutes
+subtrees are excluded before discovering their detail/attachment URLs. When
+exclusions occur, the proposed document is a labelled public projection with a
+warning and its own checksum; original source bytes remain private evidence.
+Unknown visibility states or contradictory detail visibility still fail closed.
+Original PDF, Office, PNG and JPEG attachments are
 stored unchanged. These files are evidence, not rendered or executed by the
 collector. External hyperlinks, videos, linked policy libraries, OCR, extracted
 votes and other attachment formats are outside this first version's scope.
@@ -220,15 +225,41 @@ public listing, so it is not used to authorize retrieval. Later publication or a
 changed attachment creates a fresh review proposal. Failed required downloads
 withhold the affected meeting, preserving the previous record.
 
-**Coverage limit:** Simbli's initial public listing contains the latest 50
-meetings across all types. Older pagination needs a separate POST/session-based
-search which is not implemented here. The adapter checks the listing count and
-date ordering and rejects a window touching or preceding the oldest listed date
-when additional rows exist. It does not silently report a partial historical
-backfill as complete. Use recent, narrow windows; a future window may correctly
-contain no board meetings if the district has not posted them yet.
+The initial public listing contains the latest 50 meetings across all types.
+Older pages use the observed **read-only** `GetMeetingListing` POST, with public
+anonymous session context from that listing. The collector allows only this exact
+endpoint, tenant 4013, 50-row pages, descending date order, and no custom filters
+or user identity. Source bytes and request evidence stay private. Pagination
+stops only after covering the requested start date or exhausting the archive.
+Changed totals, duplicate identities, missing context, unexpected order, and page
+limits make coverage incomplete. A future window may have no posted meetings;
+this is not proof that no meetings are scheduled.
 
-This source retrieves civic data with public GET requests through the existing transport, with
+For an annual capture, opt into the larger **bounded** systematic profile:
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=/tmp/civpulse-playwright uv run --extra browser civpulse-updater collect bibb-school-board --from 2026-01-01 --to 2026-12-31 --systematic --headed
+PLAYWRIGHT_BROWSERS_PATH=/tmp/civpulse-playwright uv run --extra browser civpulse-updater collect bibb-school-board --from 2026-01-01 --to 2026-12-31 --systematic --headed --resume-run RUN_ID
+```
+
+Systematic capture permits 2,000 total requests, 100 meetings, ten listing pages,
+5,000 resource candidates, 500 MB per response, and 10 GB downloaded per run. It
+retains one-second pacing, persisted cooldowns, hourly/browser limits, public
+destination/TLS checks, and local review. Ordinary collection retains its 120
+request cap and source download/event limits. No public records are uploaded.
+
+Every discovered meeting and every successful resource download is checkpointed.
+Incomplete bundles never produce proposals. `--resume-run` verifies saved
+checksums before network access, reuses completed downloads, and retrieves only
+missing resources. Source identity, allowed hosts, timezone and requested dates
+must match. Incomplete discovery/event-limit runs require fresh discovery rather
+than resume. A resumed run preserves the original observation time, so it cannot
+overwrite a newer observation. It continues the original source snapshot; use a
+fresh collection to check for revisions. Expired public session context or invalid
+saved source structures may also require a fresh collection. Replay remains
+offline and never repairs missing downloads.
+
+This source retrieves civic data with public GET requests and the constrained read-only archive POST through the existing transport, with
 no login. Browser recovery is optional (see below); unexpected source structures
 fail collection. Limits: 15 meetings, 250 supporting resources,
 100 MB per response, 500 MB total downloaded bytes, at least one second between requests.
@@ -264,8 +295,8 @@ Publishing remains disabled.
 
 Protections apply to Simbli even without browser recovery:
 
-- One serialized collector per state directory, at least 1 second between GETs,
-  at most 120 GETs per run, and no automatic HTTP retry loop.
+- One serialized collector per state directory, at least 1 second between requests,
+  at most 120 requests per ordinary run (2,000 with `--systematic`), and no automatic HTTP retry loop.
 - At most five browser attempts for distinct URLs per run, at least 30 seconds between attempts,
   and at most 45 attempts per rolling hour, persisted before browser launch.
 - HTTP 401/403/429/503 or any Retry-After header stops network access for at least
@@ -332,7 +363,7 @@ captured before navigation is aborted, so attachments are never rendered.
 A challenge may make at most two verification POSTs to the same constrained,
 same-host endpoint whose JavaScript was already fetched successfully in that
 recovery. Each body is capped at 64 KiB. These count against the existing
-12-request recovery budget and 120-request run budget and use the same pacing,
+12-request recovery budget and the selected ordinary/systematic run budget and use the same pacing,
 deadline, TLS/DNS validation and response byte limits. `/Services/` writes,
 unlisted endpoints and third-party POSTs remain blocked. This exception only
 submits browser challenge verification, never Civic Pulse records. Request and
@@ -364,7 +395,7 @@ two-verification-POST sublimits, and the 45-second timeout. It permits ordinary
 public HTTPS verification resources and redirects, with a ten-minute interaction
 window. All requests still pass through the pinned, TLS-verified broker: one
 request per second, 30-second cooldown, 45 browser attempts/hour, five distinct
-recovery targets/run, and 120 total requests/run. Server deferrals still stop the
+recovery targets/run, and the selected ordinary/systematic request cap. Server deferrals still stop the
 run. Source response/aggregate download limits apply to all verification assets;
 Manual verification POST bodies use the source per-response byte cap;
 unattended verification retains its 64 KiB cap. Private network destinations, non-HTTPS,
