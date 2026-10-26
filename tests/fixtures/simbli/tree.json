@@ -1,0 +1,49 @@
+{
+  "Items": [
+    {
+      "ID": "slshnK78slsh3HMKTp5hxAxJKGpA==",
+      "AgendaID": 2938818,
+      "Title": "I. Call to Order",
+      "Visibility": 0,
+      "Deleted": false,
+      "Children": [],
+      "HasAttachment": false
+    },
+    {
+      "ID": "Z5plusOYKpapBwYoBPKfboAMQ==",
+      "AgendaID": 2938819,
+      "Title": "II. Approval of the Agenda ",
+      "Visibility": 0,
+      "Deleted": false,
+      "Children": [],
+      "HasAttachment": false
+    },
+    {
+      "ID": "t1Q5JMislsh9YZ7r5ro0wXKyQ==",
+      "AgendaID": 2938820,
+      "Title": "III. Millage Rate Public Hearing # 2  (PRESENTATION)",
+      "Visibility": 0,
+      "Deleted": false,
+      "Children": [],
+      "HasAttachment": true
+    },
+    {
+      "ID": "NDufhUAnKOsIKDplusg17QY9g==",
+      "AgendaID": 2938821,
+      "Title": "IV. Invitation to Visitors to Address the Board",
+      "Visibility": 0,
+      "Deleted": false,
+      "Children": [],
+      "HasAttachment": false
+    },
+    {
+      "ID": "yC2aslshM6ekKplusOXuKXD9pEWg==",
+      "AgendaID": 2938822,
+      "Title": "V. Adjourn",
+      "Visibility": 0,
+      "Deleted": false,
+      "Children": [],
+      "HasAttachment": false
+    }
+  ]
+}

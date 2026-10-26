@@ -1,0 +1,35 @@
+{
+  "id": 2395,
+  "eventName": "Board of Commissioners Meeting",
+  "eventDate": "2026-10-06T18:00:00Z",
+  "categoryId": 26,
+  "isPublished": "Published",
+  "isDeleted": false,
+  "agendaId": 2068,
+  "publishedFiles": [
+    {
+      "id": 0,
+      "fileId": 3726,
+      "publishTo": null,
+      "type": "Agenda Packet",
+      "publishOn": "2026-10-02T14:23:47.033Z",
+      "publishBy": null,
+      "name": "10/6/2026 - Commission Meeting",
+      "url": null,
+      "sort": 0,
+      "fileType": 2,
+      "streamUrl": "https://maconbibbcoga.api.civicclerk.com/v1/Meetings/GetMeetingFileStream(fileId=3726,plainText=false)"
+    }
+  ],
+  "eventLocation": {
+    "id": 908,
+    "eventId": 0,
+    "address1": "City Hall",
+    "address2": "700 Poplar Street",
+    "city": "Macon",
+    "state": "GA",
+    "zipCode": "31201"
+  },
+  "durationHrs": 0,
+  "durationMin": 0
+}

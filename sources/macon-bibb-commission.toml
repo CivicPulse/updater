@@ -1,0 +1,12 @@
+id = "macon-bibb-commission"
+adapter = "civicclerk"
+url = "https://maconbibbcoga.api.civicclerk.com/v1/Events"
+allowed_hosts = ["maconbibbcoga.api.civicclerk.com", "civicclerk.blob.core.windows.net"]
+timezone = "America/New_York"
+mode = "review-only"
+max_pages = 10
+max_events = 30
+max_resources = 100
+max_bytes = 100000000
+max_total_bytes = 500000000
+request_interval = 1.0

@@ -1,0 +1,10 @@
+id = "bibb-democrats"
+adapter = "bibb-democrats"
+url = "https://www.bibbdems.com/events"
+allowed_hosts = ["www.bibbdems.com", "bibbdems.com"]
+timezone = "America/New_York"
+mode = "review-only"
+max_pages = 10
+max_events = 150
+# Observed listing is 2,006,558 bytes; retain a bounded margin for new events.
+max_bytes = 3000000

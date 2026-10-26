@@ -1,0 +1,12 @@
+id = "bibb-school-board"
+adapter = "simbli"
+url = "https://simbli.eboardsolutions.com/SB_Meetings/SB_MeetingListing.aspx?S=4013"
+allowed_hosts = ["simbli.eboardsolutions.com"]
+timezone = "America/New_York"
+mode = "review-only"
+max_pages = 1
+max_events = 15
+max_resources = 250
+max_bytes = 100000000
+max_total_bytes = 500000000
+request_interval = 1.0

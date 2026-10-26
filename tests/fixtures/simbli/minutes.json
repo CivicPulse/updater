@@ -1,0 +1,46 @@
+{
+  "MeetingMinutes": {
+    "Title": null,
+    "Minutes": "",
+    "Visibility": 0,
+    "Attachments": null,
+    "ChildMinutesLst": []
+  },
+  "LstItemMinutes": [
+    {
+      "Title": "I. Call to Order",
+      "Minutes": "<html>\n<head>\n\t<title></title>\n\t<link href=\"https://simbli.eboardsolutions.com/ckeditor/plugins/lite/css/lite.css?n=1234671010\" id=\"__lite__css__\" rel=\"stylesheet\" type=\"text/css\">\n\t<link href=\"https://simbli.eboardsolutions.com/ckeditor/plugins/lite/css/opentip.css\" id=\"__lite_tt_css__\" rel=\"stylesheet\" type=\"text/css\">\n\t<link href=\"https://svc.webspellchecker.net/spellcheck31/wscbundle/css/wsc.css\" rel=\"stylesheet\" type=\"text/css\">\n</head>\n\n<body data-gramm_editor=\"false\" data-wsc-instance=\"true\">This meeting of the Bibb County Board of Education was called to order at 11 a.m.<br>\n<br>\nBoard members not present were:<br>\n<br>\nMs. Myrtice Johnson<br>\nDr. Lisa Boyd</body>\n</html>\n",
+      "Visibility": 0,
+      "Attachments": [],
+      "ChildMinutesLst": []
+    },
+    {
+      "Title": "II. Approval of the Agenda ",
+      "Minutes": "<html>\n<head>\n\t<title></title>\n\t<link href=\"/ckeditor/plugins/lite/css/lite.css?n=1234671010\" id=\"__lite__css__\" rel=\"stylesheet\" type=\"text/css\">\n\t<link href=\"https://simbli.eboardsolutions.com/ckeditor/plugins/lite/css/opentip.css\" id=\"__lite_tt_css__\" rel=\"stylesheet\" type=\"text/css\">\n\t<link href=\"https://svc.webspellchecker.net/spellcheck31/wscbundle/css/wsc.css\" rel=\"stylesheet\" type=\"text/css\">\n</head>\n\n<body data-gramm_editor=\"false\" data-wsc-instance=\"true\">The Board voted to approve the agenda as presented.</body>\n</html>\n",
+      "Visibility": 0,
+      "Attachments": [],
+      "ChildMinutesLst": []
+    },
+    {
+      "Title": "III. Millage Rate Public Hearing # 2  (PRESENTATION)",
+      "Minutes": null,
+      "Visibility": 0,
+      "Attachments": [],
+      "ChildMinutesLst": []
+    },
+    {
+      "Title": "IV. Invitation to Visitors to Address the Board",
+      "Minutes": "<html>\n<head>\n\t<title></title>\n\t<link href=\"https://simbli.eboardsolutions.com/ckeditor/plugins/lite/css/lite.css?n=1234671010\" id=\"__lite__css__\" rel=\"stylesheet\" type=\"text/css\">\n\t<link href=\"https://simbli.eboardsolutions.com/ckeditor/plugins/lite/css/opentip.css\" id=\"__lite_tt_css__\" rel=\"stylesheet\" type=\"text/css\">\n\t<link href=\"https://svc.webspellchecker.net/spellcheck31/wscbundle/css/wsc.css\" rel=\"stylesheet\" type=\"text/css\">\n</head>\n\n<body data-gramm_editor=\"false\" data-wsc-instance=\"true\">No visitors requested to address the Board.</body>\n</html>\n",
+      "Visibility": 0,
+      "Attachments": [],
+      "ChildMinutesLst": []
+    },
+    {
+      "Title": "V. Adjourn",
+      "Minutes": "<html>\n<head>\n\t<title></title>\n\t<link href=\"https://simbli.eboardsolutions.com/ckeditor/plugins/lite/css/lite.css?n=1234671010\" id=\"__lite__css__\" rel=\"stylesheet\" type=\"text/css\">\n\t<link href=\"https://simbli.eboardsolutions.com/ckeditor/plugins/lite/css/opentip.css\" id=\"__lite_tt_css__\" rel=\"stylesheet\" type=\"text/css\">\n\t<link href=\"https://svc.webspellchecker.net/spellcheck31/wscbundle/css/wsc.css\" rel=\"stylesheet\" type=\"text/css\">\n</head>\n\n<body data-gramm_editor=\"false\" data-wsc-instance=\"true\">The Board voted to adjourn the meeting at 11:12 a.m.</body>\n</html>\n",
+      "Visibility": 0,
+      "Attachments": [],
+      "ChildMinutesLst": []
+    }
+  ]
+}
