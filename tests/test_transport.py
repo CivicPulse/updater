@@ -105,6 +105,53 @@ def test_valid_transfer(monkeypatch, config):
     assert len(body) == evidence.size == 1025
 
 
+def test_long_response_requires_explicit_bounded_budget(monkeypatch, config):
+    from civpulse_updater.transport import FetchError
+
+    clock = [100.0]
+
+    class SlowStream(httpx.SyncByteStream):
+        def __iter__(self):
+            yield b"a"
+            clock[0] += 31
+            yield b"b"
+
+    install_transport(monkeypatch, lambda _: httpx.Response(200, stream=SlowStream()))
+    monkeypatch.setattr("civpulse_updater.transport.time.monotonic", lambda: clock[0])
+    with pytest.raises(FetchError, match="duration limit"):
+        Fetcher(config).get(config.url)
+    clock[0] = 100
+    body, evidence = Fetcher(config.model_copy(update={"response_seconds": 180})).get(
+        config.url
+    )
+    assert body == b"ab" and evidence.size == 2
+    clock[0] = 100
+    with pytest.raises(FetchError, match="duration limit"):
+        Fetcher(config.model_copy(update={"response_seconds": 180})).exchange(
+            config.url, deadline=110
+        )
+
+
+def test_deadline_is_checked_without_waiting_for_a_full_buffer(monkeypatch, config):
+    from civpulse_updater.transport import FetchError
+
+    clock = [100.0]
+    reads = []
+
+    class Trickle(httpx.SyncByteStream):
+        def __iter__(self):
+            for index in range(100):
+                clock[0] += 10
+                reads.append(index)
+                yield b"a"
+
+    install_transport(monkeypatch, lambda _: httpx.Response(200, stream=Trickle()))
+    monkeypatch.setattr("civpulse_updater.transport.time.monotonic", lambda: clock[0])
+    with pytest.raises(FetchError, match="duration limit"):
+        Fetcher(config).get(config.url)
+    assert len(reads) == 4
+
+
 def test_transient_get_retry(monkeypatch, config):
     calls = []
 

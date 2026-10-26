@@ -11,6 +11,10 @@ from .state import State
 from .transport import Fetcher, FetchError, ResponseLimitError, validate_url
 
 
+class ResumeError(ValueError):
+    """Operator guidance consisting only of fixed, non-sensitive messages."""
+
+
 def collect(
     state: State,
     store: EvidenceStore,
@@ -25,13 +29,13 @@ def collect(
     if resume_run:
         previous = state.rows("SELECT * FROM runs WHERE id=:id", id=resume_run)
         if not previous:
-            raise ValueError("Unknown resume run")
+            raise ResumeError("Unknown resume run")
         previous = previous[0]
         if any(
             error.get("stage") == "discover" or error.get("code") == "event_limit"
             for error in json.loads(previous["errors"])
         ):
-            raise ValueError(
+            raise ResumeError(
                 "Incomplete discovery cannot be resumed; start a fresh capture"
             )
         original = SourceConfig.model_validate_json(previous["config"])
@@ -48,10 +52,10 @@ def collect(
             config.allowed_hosts,
             config.timezone,
         ) or Window.model_validate_json(previous["window"]) != window:
-            raise ValueError("Resume source and window must match")
+            raise ResumeError("Resume source and window must match")
         previous_inputs = json.loads(previous["inputs"])
         if not previous_inputs:
-            raise ValueError(
+            raise ResumeError(
                 "Run has no checkpointed meetings; start a fresh collection"
             )
         for entry in previous_inputs:

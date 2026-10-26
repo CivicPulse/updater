@@ -19,7 +19,7 @@ def now() -> str:
 class State:
     def __init__(self, root: Path):
         self.root = root
-        root.mkdir(parents=True, exist_ok=True)
+        root.mkdir(mode=0o700, parents=True, exist_ok=True)
         self.engine = create_engine(f"sqlite:///{root.resolve() / 'state.sqlite3'}")
         cfg = Config()
         cfg.set_main_option(

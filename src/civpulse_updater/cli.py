@@ -14,6 +14,7 @@ from . import __version__
 from .config import Settings, load_source
 from .evidence import EvidenceStore
 from .models import Window
+from .pipeline import ResumeError
 from .pipeline import collect as collect_run
 from .pipeline import replay as replay_run
 from .plugins import load_adapter
@@ -46,7 +47,9 @@ def guarded(function):
             emit(
                 {
                     "error": type(error).__name__,
-                    "detail": "Invalid input, unavailable source, or state integrity failure",
+                    "detail": str(error)
+                    if isinstance(error, ResumeError)
+                    else "Invalid input, unavailable source, or state integrity failure",
                 }
             )
             raise typer.Exit(2) from error
@@ -78,7 +81,7 @@ def main(
 
 @contextmanager
 def local_state():
-    settings.state_dir.mkdir(parents=True, exist_ok=True)
+    settings.state_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
     with FileLock(settings.state_dir / "updater.lock", timeout=0):
         state = State(settings.state_dir)
         try:
@@ -157,6 +160,7 @@ def collect(
                 "max_resources": 5000,
                 "max_bytes": 500_000_000,
                 "max_total_bytes": 10_000_000_000,
+                "response_seconds": 180,
             }
         )
     if browser_fallback or browser is not None or headed:

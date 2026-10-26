@@ -127,7 +127,9 @@ class Fetcher:
         """One pinned request, no redirects/retries; POST restricted to verification."""
         host = self.validate_request(url, method, content)
         self.before_request(deadline)
-        deadline = min(deadline or float("inf"), time.monotonic() + 30)
+        deadline = min(
+            deadline or float("inf"), time.monotonic() + self.config.response_seconds
+        )
         try:
             ip = public_address(host)
             pinned = httpx.URL(url).copy_with(host=ip)
@@ -169,9 +171,7 @@ class Fetcher:
                             )
                     data = bytearray()
                     for chunk in (
-                        response.iter_raw(chunk_size=65536)
-                        if response.status_code == 200
-                        else ()
+                        response.iter_raw() if response.status_code == 200 else ()
                     ):
                         self.consume(len(chunk))
                         data.extend(chunk)

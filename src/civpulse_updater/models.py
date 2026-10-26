@@ -34,6 +34,7 @@ class SourceConfig(Model):
     max_bytes: int = Field(default=2_000_000, ge=1024, le=500_000_000)
     max_total_bytes: int = Field(default=100_000_000, ge=1024, le=10_000_000_000)
     max_resources: int = Field(default=100, ge=1, le=5000)
+    response_seconds: int = Field(default=30, ge=1, le=180)
     request_interval: float = Field(default=0.25, ge=0.25, le=10)
     enabled_plugins: tuple[str, ...] = ()
 

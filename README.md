@@ -1,7 +1,7 @@
 # Civic Pulse updater
 
 An independent Python collector for official civic data. Version 0.1 collects
-Bibb Democrats event listings and ICS files, preserves their evidence, and
+configured civic events and official commission/school-board meeting records, preserves their evidence, and
 creates local review proposals. **It cannot upload to Civic Pulse.** Approving a
 proposal records a local decision only; `publish` always exits with code 4.
 
@@ -70,7 +70,7 @@ a new reviewable change.
 The default `.state/` directory contains `state.sqlite3`, a process lock, and
 SHA-256-addressed evidence files. Run inputs, evidence metadata, parser versions,
 proposals, and review decisions are durable. JSON goes to stdout; Loguru logs go
-to stderr. Use `--json-logs` for structured logs.
+to stderr. New state directories use owner-only permissions (`0700`). Use `--json-logs` for structured logs.
 
 Global options precede the command:
 
@@ -108,7 +108,7 @@ versions are rejected. Plugins execute trusted Python code and are not sandboxed
 Install them through uv and commit the resulting lockfile.
 
 The current source config and protocol are intentionally small. There is no API
-publisher, authentication setup, scheduler, browser/OCR worker, roster importer,
+publisher, authentication setup, scheduler, OCR worker, roster importer,
 or automatic approval policy in this release. Conditional HTTP caching and
 adaptive polling from the broader plan are deferred. Add future schema changes
 as Alembic revisions; never edit a migration after distributing it.
@@ -243,7 +243,7 @@ PLAYWRIGHT_BROWSERS_PATH=/tmp/civpulse-playwright uv run --extra browser civpuls
 ```
 
 Systematic capture permits 2,000 total requests, 100 meetings, ten listing pages,
-5,000 resource candidates, 500 MB per response, and 10 GB downloaded per run. It
+5,000 resource candidates, 500 MB and 180 seconds per response, and 10 GB downloaded per run. It
 retains one-second pacing, persisted cooldowns, hourly/browser limits, public
 destination/TLS checks, and local review. Ordinary collection retains its 120
 request cap and source download/event limits. No public records are uploaded.

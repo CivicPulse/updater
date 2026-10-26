@@ -195,3 +195,32 @@ def test_systematic_profile_is_explicit_and_scoped(tmp_path, monkeypatch):
     args[3] = "bibb-democrats"
     assert runner.invoke(app, args + ["--systematic"]).exit_code == 2
     assert len(seen) == 2
+
+
+def test_resume_errors_explain_the_required_correction(tmp_path):
+    result = runner.invoke(
+        app,
+        [
+            "--state-dir",
+            str(tmp_path),
+            "collect",
+            "bibb-school-board",
+            "--from",
+            "2026-01-01",
+            "--to",
+            "2026-12-31",
+            "--resume-run",
+            "missing",
+        ],
+    )
+    assert result.exit_code == 2
+    assert json.loads(result.stdout)["detail"] == "Unknown resume run"
+
+
+def test_new_state_directory_is_private(tmp_path):
+    import stat
+
+    directory = tmp_path / "private-state"
+    result = runner.invoke(app, ["--state-dir", str(directory), "status"])
+    assert result.exit_code == 0
+    assert stat.S_IMODE(directory.stat().st_mode) == 0o700
