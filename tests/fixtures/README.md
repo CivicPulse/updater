@@ -41,3 +41,51 @@ public October 26 listing. Its token and connection values are placeholders.
 Pagination tests generate a second historical page and verify the pinned,
 read-only POST contract, coverage, duplicate detection and offline replay. No
 real session context is stored in the fixture.
+
+## Georgia General Assembly
+
+`georgia/` contains public official JSON sampled October 26, 2026 from
+`https://www.legis.ga.gov/api/`. List fixtures retain one row (the configured
+session for `sessions.json`); detail responses retain their source fields.
+Whitespace was reformatted. No anonymous token response, bearer header or request
+key is included. The fixtures are reference samples, not a complete session.
+
+| Fixture | Official endpoint relative to `/api/` |
+| --- | --- |
+| sessions | `sessions` (session 1033) |
+| members | `members/list/1033` |
+| member | `members/detail/5025?session=1033&chamber=1` |
+| committees | `committees/List/1033` |
+| committee | `committees/details/87/1033` |
+| bill | `legislation/detail/69281` |
+| votes | `Vote/list/1/1033` |
+| vote | `Vote/detail/26581` |
+| days | `sessions/days/1033` |
+| calendars | `Document/calendars?sessionId=1033&chamber=1&date=2026-04-02` |
+| meetings | `meetings?startDate=Mon%20Oct%2026%202026&endDate=Mon%20Nov%2002%202026` |
+
+Search pagination responses, alternate identities and failed downloads in tests
+are synthetic. The end-to-end fixture deliberately repeats one meeting across
+schedule chunks to exercise deduplication. Real House roll-call data contains
+four distinct anonymous vacant seats with the same zero member ID; the parser
+preserves those rows while rejecting duplicate nonzero member identities.
+
+The `senate-members`/`senate-member` pair contains the first Senate member from
+the same session listing and its chamber-aware detail request. The
+`senate-votes`/`senate-vote` pair contains the first Senate roll call from
+`Vote/list/2/1033` and its corresponding `Vote/detail/ID`. These were also sampled
+October 26 with the connector's pinned transport; no tokens are included.
+
+`georgia/house-attendance.json` is the public listing row for House vote 26533,
+April 2, 2026. Its detail endpoint returned HTTP 500 during the full session
+capture. The official website's `rollCallCheck` deliberately skips House
+attendance detail requests and displays listing totals; the regression test
+reproduces the failed request, then resumes with original listing bytes and an
+explicit aggregate-only warning. Senate attendance detail remains supported.
+The official client also explicitly defines ballot code 4 as `Unknown`; tests
+preserve that code while rejecting unrecognized values.
+
+`georgia/cancelled-meeting.json` retains the public January 21, 2025 Joint
+Appropriations schedule row from the full capture. Its explicit `CANCELED` title
+prefix exercises cancelled status and source-based review warnings; synthetic
+variants exercise optional metadata and reject malformed metadata.

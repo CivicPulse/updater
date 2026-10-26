@@ -1,0 +1,44 @@
+[
+  {
+    "district": {
+      "id": 59,
+      "number": 43,
+      "chamberType": 1,
+      "suffix": "rd"
+    },
+    "party": 0,
+    "photos": [
+      {
+        "type": 2,
+        "url": "https://www.legis.ga.gov/api/images/default-source/portraits/adesanya-solomon-5025.jpg?size=mpSm"
+      }
+    ],
+    "lastName": "Adesanya",
+    "firstName": "Solomon",
+    "districtNumber": 43,
+    "city": "Marietta",
+    "fullName": "Solomon Adesanya",
+    "sessionId": 1033,
+    "id": 5025,
+    "name": {
+      "first": "Solomon",
+      "last": "Adesanya",
+      "middle": null,
+      "nickname": null,
+      "suffix": null,
+      "familyName": "Adesanya"
+    },
+    "districtAddress": {
+      "address1": "P.O. Box 674808",
+      "address2": null,
+      "city": "Marietta",
+      "state": "GA",
+      "zip": "30006     ",
+      "phone": null,
+      "fax": null,
+      "email": null
+    },
+    "residence": "Marietta",
+    "dateVacated": null
+  }
+]

@@ -780,7 +780,11 @@ def test_manual_firefox_resumes_and_preserves_evidence(
                 },
                 stream=Stream(b"ok"),
             )
-        body = terminal_body if "verified=yes" in request.headers.get("cookie", "") else html
+        body = (
+            terminal_body
+            if "verified=yes" in request.headers.get("cookie", "")
+            else html
+        )
         return httpx.Response(
             200,
             headers={"content-type": "application/pdf" if body == PDF else "text/html"},

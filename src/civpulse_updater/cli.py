@@ -14,7 +14,7 @@ from . import __version__
 from .config import Settings, load_source
 from .evidence import EvidenceStore
 from .models import Window
-from .pipeline import ResumeError
+from .pipeline import ResumeError, latest_resumable_run
 from .pipeline import collect as collect_run
 from .pipeline import replay as replay_run
 from .plugins import load_adapter
@@ -140,14 +140,30 @@ def collect(
             help="Bibb archive capture: bounded 2,000 requests, 100 meetings, 500 MB/file and 10 GB/run; normal pacing remains.",
         ),
     ] = False,
+    full_session: Annotated[
+        bool,
+        typer.Option(
+            "--full-session",
+            help="Allow up to two years for a Georgia legislative session capture.",
+        ),
+    ] = False,
+    resume_latest: Annotated[
+        bool,
+        typer.Option(
+            "--resume-latest",
+            help="Resume the newest matching unfinished capture; start fresh when no usable checkpoint exists.",
+        ),
+    ] = False,
     resume_run: Annotated[
         str | None,
         typer.Option(
             "--resume-run",
-            help="Continue the saved meeting/resource checkpoints from this run; source and dates must match.",
+            help="Continue saved record/resource checkpoints; source, session and dates must match.",
         ),
     ] = None,
 ):
+    if resume_latest and resume_run is not None:
+        raise ResumeError("Choose either --resume-run or --resume-latest")
     config = load_source(settings.sources_dir, source)
     if systematic:
         config = type(config).model_validate(
@@ -175,8 +191,20 @@ def collect(
                 "browser_headed": headed or config.browser_headed,
             }
         )
-    window = Window(start=date.fromisoformat(start), end=date.fromisoformat(end))
+    window = Window(
+        start=date.fromisoformat(start),
+        end=date.fromisoformat(end),
+        full_session=full_session,
+    )
     with local_state() as state:
+        if resume_latest:
+            resume_run = latest_resumable_run(state, config, window)
+            logger.info(
+                "Resuming checkpointed run {}"
+                if resume_run
+                else "Starting a fresh capture",
+                *([resume_run] if resume_run else []),
+            )
         result = collect_run(
             state,
             EvidenceStore(settings.state_dir / "evidence"),

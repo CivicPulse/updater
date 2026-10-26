@@ -16,6 +16,48 @@ class ResumeError(ValueError):
     """Operator guidance consisting only of fixed, non-sensitive messages."""
 
 
+def resume_identity(config: SourceConfig):
+    return (
+        config.id,
+        config.adapter,
+        config.url,
+        config.allowed_hosts,
+        config.timezone,
+        config.legislature_session_id,
+    )
+
+
+def latest_resumable_run(state: State, config: SourceConfig, window: Window):
+    """Called while holding the state lock; never revive a superseded snapshot."""
+    candidates = state.rows(
+        "SELECT id,status,config,window FROM runs WHERE source=:source ORDER BY started_at DESC",
+        source=config.id,
+    )
+    for row in candidates:
+        original = SourceConfig.model_validate_json(row["config"])
+        if (
+            resume_identity(original) != resume_identity(config)
+            or Window.model_validate_json(row["window"]) != window
+        ):
+            continue
+        # The newest matching observation controls recovery. A completed or
+        # non-resumable newer run must not revive an older unfinished snapshot.
+        if row["status"] == "complete":
+            return None
+        checkpoint = state.rows(
+            "SELECT errors,inputs != '[]' AS has_inputs FROM runs WHERE id=:id",
+            id=row["id"],
+        )[0]
+        errors = json.loads(checkpoint["errors"])
+        if not checkpoint["has_inputs"] or any(
+            error.get("stage") == "discover" or error.get("code") == "event_limit"
+            for error in errors
+        ):
+            return None
+        return row["id"]
+    return None
+
+
 def collect(
     state: State,
     store: EvidenceStore,
@@ -24,6 +66,8 @@ def collect(
     fetcher=None,
     resume_run=None,
 ):
+    if window.full_session and config.adapter != "georgia-legislature":
+        raise ValueError("Full-session windows require the Georgia legislature adapter")
     adapter = load_adapter(config)
     validate_url(config.url, config.allowed_hosts)
     previous_inputs = []
@@ -41,23 +85,14 @@ def collect(
             )
         original = SourceConfig.model_validate_json(previous["config"])
         if (
-            original.id,
-            original.adapter,
-            original.url,
-            original.allowed_hosts,
-            original.timezone,
-        ) != (
-            config.id,
-            config.adapter,
-            config.url,
-            config.allowed_hosts,
-            config.timezone,
-        ) or Window.model_validate_json(previous["window"]) != window:
+            resume_identity(original) != resume_identity(config)
+            or Window.model_validate_json(previous["window"]) != window
+        ):
             raise ResumeError("Resume source and window must match")
         previous_inputs = json.loads(previous["inputs"])
         if not previous_inputs:
             raise ResumeError(
-                "Run has no checkpointed meetings; start a fresh collection"
+                "Run has no checkpointed records; start a fresh collection"
             )
         for entry in previous_inputs:
             ref = Reference.model_validate(entry["reference"])
@@ -85,6 +120,15 @@ def collect(
                 state.observe(run, evidence.model_dump(mode="json"))
 
             fetcher = SimbliFetcher(config, state.root, capture)
+        elif config.adapter == "georgia-legislature":
+            from .georgia_transport import GeorgiaFetcher
+
+            def capture(body, evidence):
+                if store.put(body) != evidence.sha256:
+                    raise ValueError("Georgia evidence mismatch")
+                state.observe(run, evidence.model_dump(mode="json"))
+
+            fetcher = GeorgiaFetcher(config, capture)
         else:
             fetcher = Fetcher(config)
     inputs, errors, refs = [], [], {}
@@ -177,6 +221,14 @@ def collect(
         try:
             if entry.get("sha256"):
                 body = store.read(entry["sha256"])
+            elif hasattr(
+                adapter, "uses_listing_content"
+            ) and adapter.uses_listing_content(ref):
+                # Reuse original listing bytes as a replay input, never invent
+                # a successful detail request for a listing-only record.
+                body = store.read(ref.listing_hash)
+                entry["sha256"] = ref.listing_hash
+                state.save_inputs(run, inputs, errors)
             else:
                 body, evidence = fetcher.get(ref.url)
                 sha = store.put(body)

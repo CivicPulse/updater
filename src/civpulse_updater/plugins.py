@@ -18,12 +18,14 @@ class Adapter(Protocol):
 def load_adapter(config: SourceConfig) -> Adapter:
     from .adapters.bibb_democrats import BibbDemocrats
     from .adapters.civicclerk import CivicClerk
+    from .adapters.georgia_legislature import GeorgiaLegislature
     from .adapters.simbli import Simbli
 
     registry = {
         "bibb-democrats": BibbDemocrats,
         "civicclerk": CivicClerk,
         "simbli": Simbli,
+        "georgia-legislature": GeorgiaLegislature,
     }
     for entry in entry_points(group="civpulse_updater.sources"):
         if entry.name in config.enabled_plugins:

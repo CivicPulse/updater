@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "civpulse-updater"
 version = "0.1.0"
-description = "Review-only collection of official civic events"
+description = "Review-only collection of official civic and legislative records"
 requires-python = ">=3.13,<3.14"
 license = "MIT"
 dependencies = [

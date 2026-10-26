@@ -1,0 +1,1273 @@
+{
+  "displayName": "John Albers",
+  "title": null,
+  "dateVacated": null,
+  "residence": "Roswell ",
+  "capitolAddress": {
+    "address1": "421-C State Capitol",
+    "address2": null,
+    "city": "Atlanta",
+    "state": "GA",
+    "zip": "30334     ",
+    "phone": "4044638055",
+    "fax": "4046516768",
+    "email": "john.albers@senate.ga.gov"
+  },
+  "homePhone": null,
+  "cellPhone": null,
+  "occupation": "Executive & Business Owner",
+  "email": "john.albers@senate.ga.gov",
+  "party": 1,
+  "chamber": 2,
+  "districtNumber": 56,
+  "districtSuffix": "th",
+  "districtMap": null,
+  "committeeMemberships": [
+    {
+      "committee": {
+        "id": 81,
+        "sessionId": 1033,
+        "name": "Public Safety",
+        "chamber": 2
+      },
+      "dateVacated": null,
+      "role": "Chairman"
+    },
+    {
+      "committee": {
+        "id": 138,
+        "sessionId": 1033,
+        "name": "Finance",
+        "chamber": 2
+      },
+      "dateVacated": null,
+      "role": "Vice Chairman"
+    },
+    {
+      "committee": {
+        "id": 103,
+        "sessionId": 1033,
+        "name": "Appropriations",
+        "chamber": 2
+      },
+      "dateVacated": null,
+      "role": "Member"
+    },
+    {
+      "committee": {
+        "id": 130,
+        "sessionId": 1033,
+        "name": "Government Oversight",
+        "chamber": 2
+      },
+      "dateVacated": null,
+      "role": "Ex-Officio"
+    },
+    {
+      "committee": {
+        "id": 141,
+        "sessionId": 1033,
+        "name": "Regulated Industries and Utilities",
+        "chamber": 2
+      },
+      "dateVacated": null,
+      "role": "Ex-Officio"
+    },
+    {
+      "committee": {
+        "id": 131,
+        "sessionId": 1033,
+        "name": "Urban Affairs",
+        "chamber": 2
+      },
+      "dateVacated": null,
+      "role": "Member"
+    },
+    {
+      "committee": {
+        "id": 83,
+        "sessionId": 1033,
+        "name": "Rules",
+        "chamber": 2
+      },
+      "dateVacated": null,
+      "role": "Member"
+    }
+  ],
+  "committeeMembershipsArchive": [],
+  "biography": "https://www.legis.ga.gov/api/document/docs/default-source/bios/albers-john-754.pdf",
+  "press": "https://senatepress.net/category/senate-press/john-albers",
+  "photos": [
+    {
+      "type": 1,
+      "url": "https://www.legis.ga.gov/api/images/default-source/portraits/albers-john-754.jpg"
+    },
+    {
+      "type": 2,
+      "url": "https://www.legis.ga.gov/api/images/default-source/portraits/albers-john-754.jpg?size=mpSm"
+    },
+    {
+      "type": 3,
+      "url": "https://www.legis.ga.gov/api/images/default-source/portraits/albers-john-754.jpg?size=mpLg"
+    }
+  ],
+  "otherInformation": null,
+  "sessionsInService": [
+    {
+      "session": {
+        "id": 1033,
+        "isCurrent": true,
+        "description": "2025-2026 Regular Session",
+        "library": "20252026",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 103,
+            "sessionId": 1033,
+            "name": "Appropriations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 130,
+            "sessionId": 1033,
+            "name": "Government Oversight",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 141,
+            "sessionId": 1033,
+            "name": "Regulated Industries and Utilities",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 131,
+            "sessionId": 1033,
+            "name": "Urban Affairs",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 83,
+            "sessionId": 1033,
+            "name": "Rules",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": true,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate-2023/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 1034,
+        "isCurrent": false,
+        "description": "2026 Special Session",
+        "library": "2026EX",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 103,
+            "sessionId": 1033,
+            "name": "Appropriations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 130,
+            "sessionId": 1033,
+            "name": "Government Oversight",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 141,
+            "sessionId": 1033,
+            "name": "Regulated Industries and Utilities",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 131,
+            "sessionId": 1033,
+            "name": "Urban Affairs",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 83,
+            "sessionId": 1033,
+            "name": "Rules",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": true,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate-2023/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 1032,
+        "isCurrent": false,
+        "description": "2023 Special Session",
+        "library": "2023EX",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 103,
+            "sessionId": 1033,
+            "name": "Appropriations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 130,
+            "sessionId": 1033,
+            "name": "Government Oversight",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 141,
+            "sessionId": 1033,
+            "name": "Regulated Industries and Utilities",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 83,
+            "sessionId": 1033,
+            "name": "Rules",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate-prop1-2021/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 1031,
+        "isCurrent": false,
+        "description": "2023-2024 Regular Session",
+        "library": "20232024",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 103,
+            "sessionId": 1033,
+            "name": "Appropriations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 130,
+            "sessionId": 1033,
+            "name": "Government Oversight",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 141,
+            "sessionId": 1033,
+            "name": "Regulated Industries and Utilities",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 83,
+            "sessionId": 1033,
+            "name": "Rules",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate-prop1-2021/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 1030,
+        "isCurrent": false,
+        "description": "2021 Special Session",
+        "library": "2021EX",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 103,
+            "sessionId": 1033,
+            "name": "Appropriations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 120,
+            "sessionId": 1033,
+            "name": "Education and Youth",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 141,
+            "sessionId": 1033,
+            "name": "Regulated Industries and Utilities",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 83,
+            "sessionId": 1033,
+            "name": "Rules",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate14/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 1029,
+        "isCurrent": false,
+        "description": "2021-2022 Regular Session",
+        "library": "20212022",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 103,
+            "sessionId": 1033,
+            "name": "Appropriations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 120,
+            "sessionId": 1033,
+            "name": "Education and Youth",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 141,
+            "sessionId": 1033,
+            "name": "Regulated Industries and Utilities",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 83,
+            "sessionId": 1033,
+            "name": "Rules",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate14/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 1027,
+        "isCurrent": false,
+        "description": "2020 Special Session",
+        "library": "2020EX",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 103,
+            "sessionId": 1033,
+            "name": "Appropriations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 141,
+            "sessionId": 1033,
+            "name": "Regulated Industries and Utilities",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 83,
+            "sessionId": 1033,
+            "name": "Rules",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 137,
+            "sessionId": 1033,
+            "name": "Veterans, Military, and Homeland Security",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate14/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 27,
+        "isCurrent": false,
+        "description": "2019-2020 Regular Session",
+        "library": "20192020",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 103,
+            "sessionId": 1033,
+            "name": "Appropriations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 141,
+            "sessionId": 1033,
+            "name": "Regulated Industries and Utilities",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 83,
+            "sessionId": 1033,
+            "name": "Rules",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 137,
+            "sessionId": 1033,
+            "name": "Veterans, Military, and Homeland Security",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 82,
+            "sessionId": 1033,
+            "name": "Retirement",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate14/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 26,
+        "isCurrent": false,
+        "description": "2018 Special Session",
+        "library": "2018EX",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 141,
+            "sessionId": 1033,
+            "name": "Regulated Industries and Utilities",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 103,
+            "sessionId": 1033,
+            "name": "Appropriations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 137,
+            "sessionId": 1033,
+            "name": "Veterans, Military, and Homeland Security",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 83,
+            "sessionId": 1033,
+            "name": "Rules",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate14/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 25,
+        "isCurrent": false,
+        "description": "2017-2018 Regular Session",
+        "library": "20172018",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 103,
+            "sessionId": 1033,
+            "name": "Appropriations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 83,
+            "sessionId": 1033,
+            "name": "Rules",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 137,
+            "sessionId": 1033,
+            "name": "Veterans, Military, and Homeland Security",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Ex-Officio"
+        },
+        {
+          "committee": {
+            "id": 141,
+            "sessionId": 1033,
+            "name": "Regulated Industries and Utilities",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate14/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 24,
+        "isCurrent": false,
+        "description": "2015-2016 Regular Session",
+        "library": "20152016",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Secretary"
+        },
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 85,
+            "sessionId": 1033,
+            "name": "State and Local Governmental Operations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 103,
+            "sessionId": 1033,
+            "name": "Appropriations",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 132,
+            "sessionId": 1033,
+            "name": "MARTOC",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate14/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 23,
+        "isCurrent": false,
+        "description": "2013-2014 Regular Session",
+        "library": "20132014",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 143,
+            "sessionId": 1033,
+            "name": "State Institutions and Property",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Chairman"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 121,
+            "sessionId": 1033,
+            "name": "Economic Development",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": {
+        "districtId": 292,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/senate/senate12/56"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 22,
+        "isCurrent": false,
+        "description": "2011 Special Session",
+        "library": "2011EX1",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 121,
+            "sessionId": 1033,
+            "name": "Economic Development",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 120,
+            "sessionId": 1033,
+            "name": "Education and Youth",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 75,
+            "sessionId": 1033,
+            "name": "Ethics",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 142,
+            "sessionId": 1033,
+            "name": "Science and Technology",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": null
+    },
+    {
+      "session": {
+        "id": 21,
+        "isCurrent": false,
+        "description": "2011-2012 Regular Session",
+        "library": "20112012",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 121,
+            "sessionId": 1033,
+            "name": "Economic Development",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 120,
+            "sessionId": 1033,
+            "name": "Education and Youth",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 75,
+            "sessionId": 1033,
+            "name": "Ethics",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 81,
+            "sessionId": 1033,
+            "name": "Public Safety",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 142,
+            "sessionId": 1033,
+            "name": "Science and Technology",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        },
+        {
+          "committee": {
+            "id": 138,
+            "sessionId": 1033,
+            "name": "Finance",
+            "chamber": 2
+          },
+          "dateVacated": null,
+          "role": "Vice Chairman"
+        }
+      ],
+      "title": null,
+      "chamber": 2,
+      "districtMap": null
+    }
+  ],
+  "birthday": "August 18",
+  "education": "University of Louisville",
+  "spouse": "Kari",
+  "religion": "Christian - Methodist",
+  "staff": "Alyssa Fernandes<a href=\"mailto:Alyssa.Fernandes@senate.ga.gov\"><br /><span class=\"sr-only\">email</span></a><a href=\"mailto:SenatePressInquiries@senate.ga.gov\">Press Inquiries<span class=\"sr-only\">email</span></a>",
+  "legislativeComments": "<ul><li>Sworn in to Georgia Senate January 10, 2011</li></ul>",
+  "freeForm1": null,
+  "freeForm2": null,
+  "contextSessionId": 1033,
+  "constituentServices": {
+    "contact": "https://gasenate.ascendantforms.com/gasd56-senator-john-albers-crm-new/",
+    "newsletter": "https://gasenate.ascendantforms.com/gasd56-senator-john-albers-newsletter/"
+  },
+  "id": 754,
+  "name": {
+    "first": "John",
+    "last": "Albers",
+    "middle": null,
+    "nickname": null,
+    "suffix": null,
+    "familyName": "Albers"
+  },
+  "districtAddress": {
+    "address1": "None Listed",
+    "address2": null,
+    "city": null,
+    "state": null,
+    "zip": null,
+    "phone": null,
+    "fax": null,
+    "email": "john.albers@senate.ga.gov"
+  }
+}

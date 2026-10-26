@@ -6,7 +6,14 @@ from datetime import date, datetime
 from typing import Literal
 from zoneinfo import ZoneInfo
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    JsonValue,
+    field_validator,
+    model_validator,
+)
 
 
 class Model(BaseModel):
@@ -28,18 +35,25 @@ class SourceConfig(Model):
     browser_engine: Literal["chromium", "firefox"] = "chromium"
     browser_headed: bool = False
     systematic: bool = False
-    max_requests: int = Field(default=500, ge=1, le=5000)
-    max_pages: int = Field(default=10, ge=1, le=50)
-    max_events: int = Field(default=150, ge=1, le=500)
+    max_requests: int = Field(default=500, ge=1, le=10000)
+    max_pages: int = Field(default=10, ge=1, le=100)
+    max_events: int = Field(default=150, ge=1, le=10000)
     max_bytes: int = Field(default=2_000_000, ge=1024, le=500_000_000)
     max_total_bytes: int = Field(default=100_000_000, ge=1024, le=10_000_000_000)
     max_resources: int = Field(default=100, ge=1, le=5000)
     response_seconds: int = Field(default=30, ge=1, le=180)
     request_interval: float = Field(default=0.25, ge=0.25, le=10)
     enabled_plugins: tuple[str, ...] = ()
+    legislature_session_id: int | None = Field(default=None, ge=1)
 
     @model_validator(mode="after")
     def browser_scope(self):
+        if self.adapter != "georgia-legislature" and (
+            self.max_events > 500 or self.max_requests > 5000 or self.max_pages > 50
+        ):
+            raise ValueError(
+                "Expanded record budgets are restricted to Georgia legislature"
+            )
         if self.systematic and self.adapter not in ("simbli", "civicclerk"):
             raise ValueError(
                 "Systematic capture is restricted to official meeting adapters"
@@ -65,11 +79,14 @@ class SourceConfig(Model):
 class Window(Model):
     start: date
     end: date  # inclusive local dates
+    full_session: bool = False
 
     @model_validator(mode="after")
     def bounded(self):
-        if not 0 <= (self.end - self.start).days <= 366:
-            raise ValueError("Window must be ordered and no longer than 367 days")
+        if not 0 <= (self.end - self.start).days <= (730 if self.full_session else 366):
+            raise ValueError(
+                "Window must be ordered and within the date or full-session limit"
+            )
         return self
 
 
@@ -159,8 +176,28 @@ class Event(Model):
         return json.dumps([self.uid, self.recurrence_id], separators=(",", ":"))
 
 
+class LegislativeRecord(Model):
+    """Typed legislative snapshot; upstream fields remain lossless in data."""
+
+    schema_version: Literal[1] = 1
+    source_id: str
+    uid: str = Field(min_length=1, max_length=1000)
+    record_type: Literal[
+        "session", "bill", "vote", "member", "seat", "committee", "calendar"
+    ]
+    title: str = Field(min_length=1, max_length=10000)
+    source_url: str
+    session_id: int
+    data: dict[str, JsonValue]
+    warnings: tuple[str, ...] = ()
+
+    @property
+    def external_id(self) -> str:
+        return json.dumps([self.uid, None], separators=(",", ":"))
+
+
 class Envelope(Model):
-    event: Event
+    event: Event | LegislativeRecord
     evidence_hashes: tuple[str, ...]
     parser_version: str
     locator: str

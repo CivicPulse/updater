@@ -1,0 +1,413 @@
+{
+  "votes": [
+    {
+      "member": {
+        "id": 754,
+        "name": "ALBERS, 56TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4980,
+        "name": "ANAVITARTE, 31ST"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 723,
+        "name": "ANDERSON, 24TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 807,
+        "name": "ANDERSON, 43RD"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 62,
+        "name": "BEARDEN, 30TH"
+      },
+      "memberVoted": 1
+    },
+    {
+      "member": {
+        "id": 4907,
+        "name": "BRASS, 6TH"
+      },
+      "memberVoted": 1
+    },
+    {
+      "member": {
+        "id": 4979,
+        "name": "BURNS, 23RD"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 9,
+        "name": "COWSERT, 46TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 10,
+        "name": "DAVENPORT, 17TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 5088,
+        "name": "DICKERSON, 21ST"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4982,
+        "name": "DIXON, 45TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4925,
+        "name": "DOLEZAL, 27TH"
+      },
+      "memberVoted": 1
+    },
+    {
+      "member": {
+        "id": 5067,
+        "name": "ECHOLS, 49TH"
+      },
+      "memberVoted": 1
+    },
+    {
+      "member": {
+        "id": 751,
+        "name": "GINN, 47TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 752,
+        "name": "GOOCH, 51ST"
+      },
+      "memberVoted": 1
+    },
+    {
+      "member": {
+        "id": 4977,
+        "name": "GOODMAN, 8TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4985,
+        "name": "HALPERN, 39TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 850,
+        "name": "HARBIN, 16TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 17,
+        "name": "HARBISON, 15TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 311,
+        "name": "HARRELL, 40TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4984,
+        "name": "HATCHETT, 50TH"
+      },
+      "memberVoted": 3
+    },
+    {
+      "member": {
+        "id": 4972,
+        "name": "HICKMAN, 4TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 5013,
+        "name": "HODGES, 3RD"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 5090,
+        "name": "HOWARD, 35TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 838,
+        "name": "HUFSTETLER, 52ND"
+      },
+      "memberVoted": 1
+    },
+    {
+      "member": {
+        "id": 4981,
+        "name": "JACKSON, 41ST"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 372,
+        "name": "JAMES, 28TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 28,
+        "name": "JONES, 10TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 851,
+        "name": "JONES II, 22ND"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 5066,
+        "name": "KEMP, 38TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4910,
+        "name": "KIRKPATRICK, 32ND"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 157,
+        "name": "LUCAS, 26TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 5007,
+        "name": "MALLOW, 2ND"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 161,
+        "name": "MANGHAM, 55TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4942,
+        "name": "MCLAURIN, 14TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 5093,
+        "name": "MCNEEL, 18TH"
+      },
+      "memberVoted": 3
+    },
+    {
+      "member": {
+        "id": 4978,
+        "name": "MERRITT, 9TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 33,
+        "name": "ORROCK, 36TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 768,
+        "name": "PARENT, 44TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4909,
+        "name": "PAYNE, 54TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4924,
+        "name": "RAHMAN, 5TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 855,
+        "name": "RHETT, 33RD"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4926,
+        "name": "ROBERTSON, 29TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 203,
+        "name": "SETZLER, 37TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 209,
+        "name": "SIMS, 12TH"
+      },
+      "memberVoted": 2
+    },
+    {
+      "member": {
+        "id": 5016,
+        "name": "STILL, 48TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 835,
+        "name": "STRICKLAND, 42ND"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4971,
+        "name": "SUMMERS, 13TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4908,
+        "name": "TILLERY, 19TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 0,
+        "name": "VACANT"
+      },
+      "memberVoted": 3
+    },
+    {
+      "member": {
+        "id": 0,
+        "name": "VACANT"
+      },
+      "memberVoted": 3
+    },
+    {
+      "member": {
+        "id": 4878,
+        "name": "WALKER, III, 20TH"
+      },
+      "memberVoted": 3
+    },
+    {
+      "member": {
+        "id": 784,
+        "name": "WATSON, 1ST"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 837,
+        "name": "WATSON, 11TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 5065,
+        "name": "WICKS, 34TH"
+      },
+      "memberVoted": 0
+    },
+    {
+      "member": {
+        "id": 4905,
+        "name": "WILLIAMS, 25TH"
+      },
+      "memberVoted": 0
+    }
+  ],
+  "legislation": [
+    {
+      "description": "SB 359",
+      "legislationId": 71630,
+      "library": "20252026",
+      "sessionId": 1033,
+      "voteId": 26646
+    }
+  ],
+  "session": {
+    "id": 1033,
+    "isCurrent": true,
+    "description": "2025-2026 Regular Session",
+    "library": "20252026",
+    "type": 0,
+    "sessionSuffix": null
+  }
+}

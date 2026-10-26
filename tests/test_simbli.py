@@ -535,7 +535,11 @@ def test_unavailable_attachment_does_not_hide_other_public_documents(
                 for field in data["ItemContents"]:
                     if field["Attachments"]:
                         field["Attachments"].append(
-                            dict(self.attachment, AttachmentID=124, Title="Second exhibit")
+                            dict(
+                                self.attachment,
+                                AttachmentID=124,
+                                Title="Second exhibit",
+                            )
                         )
                 body = json.dumps(data).encode()
             elif path.endswith("Attachment.aspx") and "AID=123&" in url:
@@ -648,7 +652,9 @@ def test_unknown_attachment_type_stops_before_download(tmp_path, source, window)
 
 
 @pytest.mark.parametrize("filename", [None, ""])
-def test_historical_attachment_uses_explicit_extension(tmp_path, source, window, filename):
+def test_historical_attachment_uses_explicit_extension(
+    tmp_path, source, window, filename
+):
     feed = Feed()
     feed.attachment.update(FileName=filename, FileExtension="pdf")
     state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")

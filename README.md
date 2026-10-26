@@ -1,7 +1,8 @@
 # Civic Pulse updater
 
 An independent Python collector for official civic data. Version 0.1 collects
-configured civic events and official commission/school-board meeting records, preserves their evidence, and
+configured civic events, official commission/school-board meetings, and Georgia
+legislative records, preserves their evidence, and
 creates local review proposals. **It cannot upload to Civic Pulse.** Approving a
 proposal records a local decision only; `publish` always exits with code 4.
 
@@ -108,7 +109,7 @@ versions are rejected. Plugins execute trusted Python code and are not sandboxed
 Install them through uv and commit the resulting lockfile.
 
 The current source config and protocol are intentionally small. There is no API
-publisher, authentication setup, scheduler, OCR worker, roster importer,
+publisher, account authentication setup, scheduler, OCR worker,
 or automatic approval policy in this release. Conditional HTTP caching and
 adaptive polling from the broader plan are deferred. Add future schema changes
 as Alembic revisions; never edit a migration after distributing it.
@@ -436,3 +437,85 @@ Verification requests and responses are captured in private local evidence, whic
 can contain session tokens. Do not share or commit `.state`. Unattended/headless
 runs retain their original stricter behavior. If the retained run or download
 budget is exhausted, recovery stops; manual mode does not reset any counters.
+
+## Georgia General Assembly
+
+```sh
+uv run --locked civpulse-updater sources validate georgia-legislature
+uv run --locked civpulse-updater collect georgia-legislature --from 2025-01-01 --to 2026-12-31 --full-session --resume-latest
+uv run --locked civpulse-updater collect georgia-legislature --from 2025-01-01 --to 2026-12-31 --full-session --resume-run RUN_ID
+uv run --locked civpulse-updater changes list
+uv run --locked civpulse-updater replay RUN_ID
+```
+
+The `georgia-legislature` connector reads the official website's public API at
+`https://www.legis.ga.gov/api/`. Its manifest pins session **1033, 2025–2026 Regular
+Session**. Change `legislature_session_id` to collect a different official session;
+the session listing validates that ID. The connector uses the website's anonymous
+token handshake, with the token held only in memory. No account is required.
+
+Coverage includes:
+
+- Session metadata and bills/resolutions, with sponsors, versions/document links,
+  committee referrals, status histories and linked votes.
+- House and Senate vote details, official totals, member ballot codes and bill
+  relationships. Repeated `VACANT` entries with member ID zero remain anonymous;
+  they are never joined to a legislator or assigned a district. House attendance
+  roll calls use official listing totals only, matching the website's deliberate
+  omission of individual detail; their records carry an explicit warning.
+- Member profiles, contact information, party codes, service history and committee
+  assignments; committees, officers, memberships and subcommittees.
+- Seats derived from the official roster's district records. These carry a review
+  warning: session rosters include former members and do not establish current
+  occupancy, a complete vacancy history, or unrepresented districts.
+- Meeting schedules and calendar/publication metadata for both chambers on the
+  official session's listed legislative days. Meeting times use America/New_York;
+  source midnight means time TBD and produces a warned date-only schedule.
+  Explicit Canceled/Cancelled title prefixes normalize to cancelled status with
+  a warning identifying that source basis.
+
+Bills, members, committees and derived seats are **whole-session snapshots**, even
+for a one-day collection. Votes and meetings use the inclusive requested dates.
+Calendar metadata is collected for listed legislative days inside that window;
+this does not assert coverage of interim calendar publications. The schedule
+endpoint exposes currently available meetings, not a guaranteed historical archive.
+PDF agenda links, bill versions and calendar document URLs are retained, but this
+connector does not download their binaries, extract PDF text, or collect video,
+transcripts, geographic boundaries or separate study-committee detail pages.
+Upstream field names and enum codes are preserved in each legislative record's
+`data`; no undocumented party, vote or document-type codes are guessed.
+
+Non-event proposals have an explicit `record_type` (`session`, `bill`, `vote`,
+`member`, `seat`, `committee`, `calendar`), `session_id`, stable source identity,
+and structured `data`. They use the same local changes/review workflow and
+immutable evidence store as events. Replay is offline. Existing event hashes and
+publication behavior are unchanged; approval is local and `publish` remains disabled.
+Feeds that contain complete records are parsed from their saved discovery bytes,
+so parsing uses the same observation without a second download of the feed.
+
+`--resume-latest` makes this same command safe to rerun after interruption: while
+holding the state lock, it selects the newest usable checkpoint matching the
+source, session and dates, verifies saved checksums, and downloads only missing
+inputs. After a completed capture, the command starts fresh to observe revisions.
+A newer run with incomplete discovery also starts fresh; it never revives an older
+snapshot. Corrupted evidence stops collection before network access. Use
+`--resume-run RUN_ID` to choose an explicit checkpoint instead; the two options
+are mutually exclusive.
+
+`--full-session` permits a window of up to 731 days for this adapter only.
+Ordinary collection retains its 367-day limit. The source permits 100 listing
+pages, 10,000 detail references, 1,000 supporting
+resources, 10,000 requests, 20 MB per response and 1 GB total, paced at one request
+per second. Even a narrow date window can fetch thousands of bills and take hours.
+These are ceilings, not coverage guarantees. Search uses the official read-only
+session-filtered POST with 200 rows per page; its exact request is retained as
+private evidence. Missing/short pages, changed totals, duplicate bill identities,
+wrong sessions and unavailable detail responses make a run partial or failed.
+Successfully captured records remain reviewable; missing records are never deleted.
+`--resume-run RUN_ID` reuses checkpointed detail downloads when discovery completed;
+changed session IDs or incomplete discovery require a fresh capture.
+
+The website's API and anonymous handshake are undocumented and may change. Source
+validation checks configuration, not network availability or completeness. Live
+endpoint samples and offline fixture validation are described in
+[Georgia connector validation](docs/georgia-legislature-validation-2026-10-26.md).
