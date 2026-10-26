@@ -219,8 +219,8 @@ uv run civpulse-updater replay RUN_ID
 ```
 
 The `simbli` adapter uses the district's official Simbli tenant, **4013**. It
-includes meeting types **Board Meeting**, **Committee Meeting**, and **Work
-Session**; individual school councils and other meeting types are excluded.
+includes meeting types **Board Meeting**, **Committee Meeting**, **Work
+Session**, and **Training Meeting**; individual school councils and other meeting types are excluded.
 Schedules use America/New_York. A publicly listed meeting without a published
 agenda can produce a schedule-only proposal with a warning.
 
@@ -232,7 +232,9 @@ exclusions occur, the proposed document is a labelled public projection with a
 warning and its own checksum; original source bytes remain private evidence.
 Unknown visibility states or contradictory detail visibility still fail closed.
 Original PDF, Office, PNG and JPEG attachments are
-stored unchanged. These files are evidence, not rendered or executed by the
+stored unchanged. Historical attachments with an absent or empty filename use
+the source's explicit `FileExtension`, subject to the same format allowlist and
+file-signature validation. These files are evidence, not rendered or executed by the
 collector. External hyperlinks, videos, linked policy libraries, OCR, extracted
 votes and other attachment formats are outside this first version's scope.
 

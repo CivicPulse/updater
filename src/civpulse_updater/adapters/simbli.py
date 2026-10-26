@@ -27,7 +27,7 @@ from ..models import (
 BASE = "https://simbli.eboardsolutions.com"
 LISTING = BASE + "/SB_Meetings/SB_MeetingListing.aspx?S=4013"
 ARCHIVE = BASE + "/Services/api/GetMeetingListing"
-TYPES = {"Board Meeting", "Committee Meeting", "Work Session"}
+TYPES = {"Board Meeting", "Committee Meeting", "Work Session", "Training Meeting"}
 
 
 class ListingCoverageError(ValueError):
@@ -190,7 +190,7 @@ def validate_document(body, extension):
 class Simbli:
     manifest = Manifest(
         name="simbli",
-        version="1.1.1",
+        version="1.1.2",
         capabilities=("meetings", "agendas", "minutes", "documents"),
     )
 
@@ -401,7 +401,14 @@ class Simbli:
                     + "/Meetings/Attachment.aspx?"
                     + urlencode({"S": 4013, "AID": aid, "MID": mid})
                 )
-            ext = string(a["FileName"]).rsplit(".", 1)[-1].lower()
+            # Older public records omit FileName but retain FileExtension.
+            # The explicit allowlist and downloaded-file signature still apply.
+            filename = a.get("FileName")
+            ext = (
+                string(a.get("FileExtension")).lower()
+                if filename is None or filename == ""
+                else string(filename).rsplit(".", 1)[-1].lower()
+            )
             if ext not in {
                 "pdf",
                 "docx",

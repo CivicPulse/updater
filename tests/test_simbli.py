@@ -571,6 +571,18 @@ def test_office_attachment_is_preserved_without_execution(tmp_path, source, wind
     assert store.read(digest(feed.pdf)) == feed.pdf
 
 
+def test_whole_board_training_is_collected(tmp_path, source, window):
+    feed = Feed()
+    for row in feed.rows:
+        if row["Master_MeetingID"] == 138067:
+            row["ML_TypeTitle"] = "Training Meeting"
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    result = collect(state, store, source, window, feed)
+    assert result["status"] == "complete" and result["records"] == 1
+    record = json.loads(state.rows("SELECT payload FROM records")[0]["payload"])
+    assert any(d["role"] == "Minutes" for d in record["documents"])
+
+
 @pytest.mark.parametrize("extension", ["doc", "xls", "ppt"])
 def test_legacy_office_signature_is_validated(tmp_path, source, window, extension):
     feed = Feed()
@@ -585,6 +597,32 @@ def test_legacy_office_signature_is_validated(tmp_path, source, window, extensio
 def test_unknown_attachment_type_stops_before_download(tmp_path, source, window):
     feed = Feed()
     feed.attachment["FileName"] = "program.exe"
+    result = collect(
+        State(tmp_path), EvidenceStore(tmp_path / "evidence"), source, window, feed
+    )
+    assert result["status"] == "failed"
+    assert not any("/Meetings/Attachment.aspx" in u for u in feed.calls)
+
+
+@pytest.mark.parametrize("filename", [None, ""])
+def test_historical_attachment_uses_explicit_extension(tmp_path, source, window, filename):
+    feed = Feed()
+    feed.attachment.update(FileName=filename, FileExtension="pdf")
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    result = collect(state, store, source, window, feed)
+    assert result["status"] == "complete"
+    assert any("/Meetings/Attachment.aspx" in u for u in feed.calls)
+    assert store.read(digest(feed.pdf)) == feed.pdf
+    feed.pdf = b"not a PDF"
+    assert collect(state, store, source, window, feed)["status"] == "failed"
+
+
+@pytest.mark.parametrize("extension", [None, "exe", "../pdf", 1])
+def test_historical_attachment_rejects_invalid_extension(
+    tmp_path, source, window, extension
+):
+    feed = Feed()
+    feed.attachment.update(FileName=None, FileExtension=extension)
     result = collect(
         State(tmp_path), EvidenceStore(tmp_path / "evidence"), source, window, feed
     )
