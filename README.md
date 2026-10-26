@@ -243,7 +243,11 @@ Minutes are requested only when the **public listing** says `PUBLISHED`.
 published. The meeting detail API's minutes flag proved inconsistent with the
 public listing, so it is not used to authorize retrieval. Later publication or a
 changed attachment creates a fresh review proposal. Failed required downloads
-withhold the affected meeting, preserving the previous record.
+withhold the affected meeting, preserving the previous record. If a document
+endpoint returns an HTML page, other verified public resources in that bundle
+are still checkpointed; the unavailable file is attempted once per run and the
+bundle remains incomplete. Source deferrals and challenge failures still stop
+network access.
 
 The initial public listing contains the latest 50 meetings across all types.
 Older pages use the observed **read-only** `GetMeetingListing` POST, with public

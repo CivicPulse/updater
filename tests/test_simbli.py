@@ -523,6 +523,49 @@ def test_invalid_download_is_evidence_but_not_a_resume_checkpoint(
     )
 
 
+def test_unavailable_attachment_does_not_hide_other_public_documents(
+    tmp_path, source, window
+):
+    class TwoAttachments(Feed):
+        def get(self, url):
+            body, evidence = super().get(url)
+            path = urlsplit(url).path
+            if "GetMeetingItemDetailsModel" in path:
+                data = json.loads(body)
+                for field in data["ItemContents"]:
+                    if field["Attachments"]:
+                        field["Attachments"].append(
+                            dict(self.attachment, AttachmentID=124, Title="Second exhibit")
+                        )
+                body = json.dumps(data).encode()
+            elif path.endswith("Attachment.aspx") and "AID=123&" in url:
+                body = b"<html><title>Attachment</title></html>"
+            return body, evidence.model_copy(
+                update={"sha256": digest(body), "size": len(body)}
+            )
+
+    feed = TwoAttachments()
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    first = collect(state, store, source, window, feed)
+    assert first["status"] == "failed" and first["records"] == 0
+    assert any("AID=124&" in url for url in feed.calls)
+    assert sum("AID=123&" in url for url in feed.calls) == 1
+    entry = json.loads(
+        state.rows("SELECT inputs FROM runs WHERE id=:id", id=first["run_id"])[0][
+            "inputs"
+        ]
+    )[0]
+    assert entry["complete"] is False
+    assert any("AID=124&" in url for url in entry["resources"])
+    assert not any("AID=123&" in url for url in entry["resources"])
+    assert not state.rows("SELECT * FROM changes")
+    restored = Feed()
+    result = collect(state, store, source, window, restored, resume_run=first["run_id"])
+    assert result["status"] == "complete" and result["records"] == 1
+    assert any("AID=123&" in url for url in restored.calls)
+    assert not any("AID=124&" in url for url in restored.calls)
+
+
 def test_resume_cannot_erase_incomplete_discovery(tmp_path, source, window):
     feed = Feed()
     source = source.model_copy(update={"max_events": 1})

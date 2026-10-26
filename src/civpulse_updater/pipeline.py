@@ -4,6 +4,7 @@ import json
 
 from loguru import logger
 
+from .adapters.simbli import PublicDocumentUnavailable
 from .evidence import EvidenceStore
 from .models import ListingRequest, Reference, SourceConfig, Window, digest
 from .plugins import load_adapter
@@ -172,6 +173,7 @@ def collect(
         if entry.get("complete", True) and entry.get("sha256"):
             continue
         stop_network = False
+        failed_resources = set()
         try:
             if entry.get("sha256"):
                 body = store.read(entry["sha256"])
@@ -194,7 +196,11 @@ def collect(
                         if hasattr(adapter, "resources_for")
                         else adapter.resources(body, resources)
                     )
-                    missing = [url for url in needed if url not in resources]
+                    missing = [
+                        url
+                        for url in needed
+                        if url not in resources and url not in failed_resources
+                    ]
                     if not missing:
                         break
                     for resource_url in missing:
@@ -208,16 +214,32 @@ def collect(
                             raise ValueError("Resource evidence mismatch")
                         state.observe(run, metadata.model_dump(mode="json"))
                         if hasattr(adapter, "validate_resource"):
-                            adapter.validate_resource(
-                                body, ref, resources, resource_url, resource_body
-                            )
+                            try:
+                                adapter.validate_resource(
+                                    body, ref, resources, resource_url, resource_body
+                                )
+                            except PublicDocumentUnavailable:
+                                # Retain the failed response as evidence, but fetch
+                                # the other verified public resources once. The
+                                # bundle stays incomplete and cannot be proposed.
+                                failed_resources.add(resource_url)
+                                errors.append(
+                                    {
+                                        "stage": "fetch",
+                                        "code": "PublicDocumentUnavailable",
+                                        "meeting_url": ref.url,
+                                        "detail": "Public document returned HTML; bundle remains incomplete",
+                                    }
+                                )
+                                state.save_inputs(run, inputs, errors)
+                                continue
                         resources[resource_url] = resource_body
                         entry.setdefault("resources", {})[resource_url] = resource_sha
                         state.save_inputs(run, inputs, errors)
                 entry["resources"] = {
                     url: store.put(data) for url, data in resources.items()
                 }
-            entry["complete"] = True
+            entry["complete"] = not failed_resources
         except (ValueError, OSError, KeyError, TypeError) as error:
             stop_network = isinstance(error, FetchError) and (
                 not isinstance(error, ResponseLimitError) or error.aggregate
