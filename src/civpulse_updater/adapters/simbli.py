@@ -130,9 +130,15 @@ def public_tree(items, child_key, *, agenda=False):
 def public_document(role, body):
     """Return source bytes unchanged unless a public projection is necessary."""
     omitted = 0
-    if role not in ("Agenda", "Minutes"):
+    if role not in ("Agenda", "Minutes", "Agenda Item"):
         return body, omitted
     document = obj(json.loads(body))
+    if role == "Agenda Item":
+        projected, omitted = public_fields(document["ItemContents"])
+        if omitted:
+            document["ItemContents"] = projected
+            return canonical(document).encode(), omitted
+        return body, 0
     key, children = (
         ("Items", "Children")
         if role == "Agenda"
@@ -143,6 +149,20 @@ def public_document(role, body):
         document[key] = projected
         return canonical(document).encode(), omitted
     return body, 0
+
+
+def public_fields(fields):
+    projected = []
+    omitted = 0
+    for field in array(fields):
+        visibility = obj(field)["FieldVisibility"]
+        if type(visibility) is not int or visibility not in (0, 1, 2, 3):
+            raise ValueError("Unknown Simbli field visibility")
+        if visibility != 0:
+            omitted += 1
+        else:
+            projected.append(field)
+    return projected, omitted
 
 
 def validate_document(body, extension):
@@ -170,7 +190,7 @@ def validate_document(body, extension):
 class Simbli:
     manifest = Manifest(
         name="simbli",
-        version="1.1.0",
+        version="1.1.1",
         capabilities=("meetings", "agendas", "minutes", "documents"),
     )
 
@@ -447,9 +467,8 @@ class Simbli:
                         or identity["Deleted"] is not False
                     ):
                         raise ValueError("Agenda item identity or visibility mismatch")
-                    for field in array(detail["ItemContents"]):
-                        if obj(field)["FieldVisibility"] != 0:
-                            raise ValueError("Non-public agenda content")
+                    public, _ = public_fields(detail["ItemContents"])
+                    for field in public:
                         for a in array(field.get("Attachments") or []):
                             attachment(a)
         if ref.minutes_published:
@@ -504,11 +523,15 @@ class Simbli:
             return []
         documents = []
         omitted = 0
+        omitted_fields = 0
         for key, (title, role, url, extension) in sorted(definitions.items()):
             body = resources[url]
             validate_document(body, extension)
             body, hidden = public_document(role, body)
-            omitted += hidden
+            if role == "Agenda Item":
+                omitted_fields += hidden
+            else:
+                omitted += hidden
             if hidden:
                 title += " (public projection)"
             # Session tokens stay only in raw local evidence, never proposals.
@@ -531,6 +554,11 @@ class Simbli:
         if omitted:
             warnings.append(
                 f"Excluded {omitted} restricted or deleted agenda/minutes subtrees; "
+                "documents with exclusions are public projections. Raw evidence stays private."
+            )
+        if omitted_fields:
+            warnings.append(
+                f"Excluded {omitted_fields} restricted agenda content fields; "
                 "documents with exclusions are public projections. Raw evidence stays private."
             )
         if metadata["IsPublished"] is False:

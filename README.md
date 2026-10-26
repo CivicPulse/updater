@@ -209,7 +209,7 @@ agenda can produce a schedule-only proposal with a warning.
 Agendas are preserved as the official structured JSON tree plus each item's
 content model; published minutes are preserved as the official JSON document,
 including its HTML text. Explicitly restricted/deleted agenda and minutes
-subtrees are excluded before discovering their detail/attachment URLs. When
+subtrees and restricted content fields are excluded before discovering their detail/attachment URLs. When
 exclusions occur, the proposed document is a labelled public projection with a
 warning and its own checksum; original source bytes remain private evidence.
 Unknown visibility states or contradictory detail visibility still fail closed.

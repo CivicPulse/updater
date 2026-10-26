@@ -303,6 +303,70 @@ def test_restricted_minutes_subtree_never_downloads_attachments(
     )
 
 
+def test_restricted_content_field_is_projected_without_its_attachment(
+    tmp_path, source, window
+):
+    feed = Feed()
+    original = feed.get
+
+    def mixed_content(url):
+        body, metadata = original(url)
+        if "/GetMeetingItemDetailsModel/" in url:
+            content = json.loads(body)
+            content["ItemContents"].append(
+                {
+                    "FieldVisibility": 3,
+                    "Content": "PRIVATE FIELD MUST NOT BE PROPOSED",
+                    "Attachments": [dict(feed.attachment, AttachmentID=999991)],
+                }
+            )
+            body = json.dumps(content).encode()
+            metadata = metadata.model_copy(
+                update={"sha256": digest(body), "size": len(body)}
+            )
+        return body, metadata
+
+    feed.get = mixed_content
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    result = collect(state, store, source, window, feed)
+    assert result["status"] == "complete" and result["records"] == 1
+    assert not any("999991" in url for url in feed.calls)
+    event = json.loads(state.rows("SELECT payload FROM records")[0]["payload"])
+    items = [d for d in event["documents"] if d["role"] == "Agenda Item"]
+    assert items and all("public projection" in d["title"] for d in items)
+    for item in items:
+        body = store.read(item["sha256"])
+        assert b"PRIVATE FIELD" not in body
+        assert len(json.loads(body)["ItemContents"]) == 1
+    assert replay(state, store, result["run_id"])["proposed_changes"] == 0
+
+
+def test_unknown_content_visibility_still_blocks_a_proposal(tmp_path, source, window):
+    feed = Feed()
+    original = feed.get
+
+    def unknown_visibility(url):
+        body, metadata = original(url)
+        if "/GetMeetingItemDetailsModel/" in url:
+            content = json.loads(body)
+            content["ItemContents"][0]["FieldVisibility"] = 99
+            body = json.dumps(content).encode()
+            metadata = metadata.model_copy(
+                update={"sha256": digest(body), "size": len(body)}
+            )
+        return body, metadata
+
+    feed.get = unknown_visibility
+    state = State(tmp_path)
+    assert (
+        collect(state, EvidenceStore(tmp_path / "evidence"), source, window, feed)[
+            "status"
+        ]
+        == "failed"
+    )
+    assert not state.rows("SELECT * FROM records")
+
+
 def test_unknown_outline_visibility_still_fails_closed(tmp_path, source, window):
     feed = Feed()
     feed.tree["Items"][0]["Visibility"] = 99
