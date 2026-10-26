@@ -41,7 +41,7 @@ def text(value):
 
 class CivicClerk:
     manifest = Manifest(
-        name="civicclerk", version="1.0.0", capabilities=("meetings", "documents")
+        name="civicclerk", version="1.1.0", capabilities=("meetings", "documents")
     )
 
     def __init__(self, config):
@@ -56,7 +56,7 @@ class CivicClerk:
         self.window = window
         query = urlencode(
             {
-                "$filter": f"categoryId eq 26 and eventDate ge {window.start}T00:00:00Z and eventDate le {window.end}T23:59:59Z",
+                "$filter": f"(categoryId eq 26 or categoryId eq 24) and eventDate ge {window.start}T00:00:00Z and eventDate le {window.end}T23:59:59Z",
                 "$orderby": "eventDate asc",
             }
         )
@@ -87,8 +87,19 @@ class CivicClerk:
             or type(raw.get("isDeleted")) is not bool
         ):
             raise ValueError("Missing public-event scope fields")
+        # The county also files legislative hearings and special meetings under
+        # General. Never include unrelated boards solely because they use it.
+        legislative_general = raw["categoryId"] == 24 and bool(
+            re.fullmatch(
+                r"(?:Special Called (?:Pre-)?Commission Meeting|"
+                r"Committee on Committees|Public Hearing(?: for FY\d{4} Budget)?)"
+                r"(?:\s*-\s*CANCELLED)?",
+                text(raw.get("eventName") or ""),
+                re.I,
+            )
+        )
         return (
-            raw.get("categoryId") == 26
+            (raw.get("categoryId") == 26 or legislative_general)
             and raw.get("isPublished") == "Published"
             and raw.get("isDeleted") is False
         )

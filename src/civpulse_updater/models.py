@@ -40,8 +40,10 @@ class SourceConfig(Model):
 
     @model_validator(mode="after")
     def browser_scope(self):
-        if self.systematic and self.adapter != "simbli":
-            raise ValueError("Systematic capture is restricted to Simbli")
+        if self.systematic and self.adapter not in ("simbli", "civicclerk"):
+            raise ValueError(
+                "Systematic capture is restricted to official meeting adapters"
+            )
         if self.browser_headed and (
             not self.browser_fallback or self.browser_engine != "firefox"
         ):

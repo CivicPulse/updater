@@ -162,6 +162,61 @@ def test_schedule_without_documents_and_cancelled(tmp_path, cc_config, cc_window
     assert event["status"] == "cancelled" and event.get("documents", []) == []
 
 
+def test_general_legislative_meetings_collected_and_replayed(
+    tmp_path, cc_config, cc_window
+):
+    class GeneralFeed(Feed):
+        def get(self, url):
+            body, meta = super().get(url)
+            if "/Events?" in url:
+                raw = json.loads(body)
+                raw["value"] = [
+                    dict(self.event, id=i, categoryId=24, eventName=title)
+                    for i, title in enumerate(
+                        [
+                            "Special Called Commission Meeting",
+                            "Public Hearing",
+                            "Public Hearing for FY2027 Budget",
+                            "Committee on Committees",
+                            "Friends of Rosa Parks Square Board Meeting",
+                            "One Time Event",
+                        ],
+                        start=1,
+                    )
+                ]
+                body = json.dumps(raw).encode()
+                meta = meta.model_copy(
+                    update={"sha256": digest(body), "size": len(body)}
+                )
+            elif "/Events/" in url:
+                raw = dict(self.event, id=int(url.rsplit("/", 1)[-1]), categoryId=24)
+                raw["eventName"] = {
+                    1: "Special Called Commission Meeting",
+                    2: "Public Hearing",
+                    3: "Public Hearing for FY2027 Budget",
+                    4: "Committee on Committees",
+                }[raw["id"]]
+                body = json.dumps(raw).encode()
+                meta = meta.model_copy(
+                    update={"sha256": digest(body), "size": len(body)}
+                )
+            return body, meta
+
+    feed = GeneralFeed()
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    result = collect(state, store, cc_config, cc_window, feed)
+    assert result["status"] == "complete" and result["records"] == 4
+    assert not any(url.endswith(("/Events/5", "/Events/6")) for url in feed.calls)
+    assert replay(state, store, result["run_id"])["records"] == 4
+    adapter = CivicClerk(cc_config)
+    general = dict(
+        feed.event, categoryId=24, eventName="Special Called Commission Meeting"
+    )
+    assert adapter.public(general)
+    assert not adapter.public(dict(general, isPublished="Draft"))
+    assert not adapter.public(dict(general, isDeleted=True))
+
+
 def test_pagination_and_empty_schema(cc_config, cc_window):
     adapter = CivicClerk(cc_config)
     url = adapter.start_urls(cc_window)[0]

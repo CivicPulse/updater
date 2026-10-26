@@ -192,9 +192,15 @@ def test_systematic_profile_is_explicit_and_scoped(tmp_path, monkeypatch):
     )
     assert config.max_bytes == 500_000_000 and config.max_total_bytes == 10_000_000_000
     assert config.request_interval == 1 and kw["resume_run"] == "fixture-run"
+    args[3] = "macon-bibb-commission"
+    assert runner.invoke(app, args + ["--systematic"]).exit_code == 0
+    config, _ = seen[-1]
+    assert config.systematic and config.adapter == "civicclerk"
+    assert config.max_events == 100 and config.max_resources == 5000
+    assert config.request_interval == 1 and not config.browser_fallback
     args[3] = "bibb-democrats"
     assert runner.invoke(app, args + ["--systematic"]).exit_code == 2
-    assert len(seen) == 2
+    assert len(seen) == 3
 
 
 def test_resume_errors_explain_the_required_correction(tmp_path):

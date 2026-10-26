@@ -158,8 +158,11 @@ uv run civpulse-updater replay RUN_ID
 ```
 
 The `civicclerk` adapter reads the public Macon-Bibb CivicClerk API, scoped to
-category **26 (Board of Commissioners)**. The county also assigns some
-Pre-Commission meetings to this category. Other committees are excluded.
+category **26 (Board of Commissioners)**, including Pre-Commission meetings.
+It also reads category **24 (General)** and selects explicitly named special-called
+commission/pre-commission meetings, Committee on Committees, and public hearings
+(including FY budget hearings). The county files these legislative records outside
+category 26. Unrelated General boards and unnamed events are excluded.
 It collects local meeting times, cancellation labels, published agenda/packet
 and minutes PDFs, and downloadable attachments nested within agenda items.
 Documents retain source IDs, roles, titles, SHA-256 checksums and byte sizes in
@@ -172,6 +175,21 @@ Use narrow date windows: real agenda packets can exceed 64 MB. Limits and failed
 required downloads withhold the affected meeting's proposal and preserve its
 previous record. Other successfully collected meetings may produce proposals in
 a partial run. Absence from a listing never deletes a stored meeting.
+
+For an annual capture, use the explicit bounded profile and resume incomplete
+bundles from their saved checkpoint:
+
+```sh
+uv run --locked civpulse-updater collect macon-bibb-commission --from 2026-01-01 --to 2026-12-31 --systematic
+uv run --locked civpulse-updater collect macon-bibb-commission --from 2026-01-01 --to 2026-12-31 --systematic --resume-run RUN_ID
+```
+
+This permits 100 meetings, ten listing pages, 5,000 supporting resources,
+2,000 requests, 500 MB per response and 10 GB per run, with one-second pacing.
+It does not enable browser recovery or publication. A complete capture covers
+currently posted records, including future schedules; later revisions and
+unpublished minutes require a fresh collection. General-category unnamed events
+cannot be attributed to the commission and require separate scope review.
 
 The core supports optional `start_urls(window)`, `resources(content, saved_bytes)`
 and `parse_bundle(content, reference, hash, window, saved_bytes)` adapter hooks.
