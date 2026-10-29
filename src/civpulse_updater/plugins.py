@@ -19,12 +19,14 @@ def load_adapter(config: SourceConfig) -> Adapter:
     from .adapters.bibb_democrats import BibbDemocrats
     from .adapters.civicclerk import CivicClerk
     from .adapters.georgia_legislature import GeorgiaLegislature
+    from .adapters.macon_water import MaconWater
     from .adapters.simbli import Simbli
 
     registry = {
         "bibb-democrats": BibbDemocrats,
         "civicclerk": CivicClerk,
         "simbli": Simbli,
+        "macon-water-authority": MaconWater,
         "georgia-legislature": GeorgiaLegislature,
     }
     for entry in entry_points(group="civpulse_updater.sources"):

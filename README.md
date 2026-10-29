@@ -519,3 +519,50 @@ The website's API and anonymous handshake are undocumented and may change. Sourc
 validation checks configuration, not network availability or completeness. Live
 endpoint samples and offline fixture validation are described in
 [Georgia connector validation](docs/georgia-legislature-validation-2026-10-26.md).
+
+## Macon Water Authority
+
+```sh
+uv run --locked civpulse-updater sources validate macon-water-authority
+uv run --locked civpulse-updater collect macon-water-authority --from 2026-10-08 --to 2026-10-08
+uv run --locked civpulse-updater changes list
+uv run --locked civpulse-updater replay RUN_ID
+```
+
+The `macon-water-authority` adapter reads the public Diligent Community portal
+linked by the [authority's publications page](https://maconwater.org/public-information/publications/).
+It includes the authority board, Engineering, Finance, Outdoor, Pension,
+Pension Trustee, Personnel and Policy meeting types. The mixed imported archive
+(type 17) is included only for titles starting `Macon Water Authority -`.
+Macon Soils, Macon Water Alliance and external calendars are excluded.
+
+Dates are inclusive America/New_York dates. Requests extend through the next day
+and returned records are filtered locally: the portal returns no records for
+identical `from` and `to` parameters. Stable meeting IDs survive rescheduling;
+ambiguous/nonexistent local timestamps and conflicting identities fail parsing.
+Calendar entries without a published agenda become schedule-only proposals with
+a warning. Status remains unknown unless the title explicitly says cancelled,
+which produces a cancellation warning. Regular meeting times are never generated
+from the authority's general monthly schedule.
+
+Only document entries explicitly marked `IsPublic: true` are processed. Private
+document HTML and links are ignored before attachment discovery. Public agenda
+and minutes HTML is materialized byte-for-byte as UTF-8, with its own checksum,
+size and role. The original JSON response is also preserved as private evidence.
+The importer downloads same-tenant `/document/` links from that public HTML;
+PDFs and HTML documents bearing the portal's iCompass/Aspose document markers
+are accepted. Other HTML responses fail validation;
+earlier minutes linked within an agenda retain the `Attachment` role. A failed,
+missing or unsupported attachment withholds that meeting's proposal. Approval remains
+local and publishing is disabled.
+
+This module does not fetch DOCX/full agenda-packet exports, external link
+attachments, images, videos, BoardDocs archives, board member records or election
+records. It does not extract PDF text or perform OCR. Returned document JSON can
+contain private metadata: keep the evidence directory private and out of Git.
+The portal's service is undocumented and may change. A complete run covers the
+records returned by its date-filtered listing, not a guaranteed historical
+archive. Missing records never delete prior observations. No browser fallback or
+systematic capture profile is enabled. Default limits are 100 meetings, 500
+supporting resources, 100 MB per response, 500 MB total and one-second pacing.
+See [validation notes](docs/macon-water-validation-2026-10-27.md).

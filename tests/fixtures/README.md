@@ -89,3 +89,13 @@ preserve that code while rejecting unrecognized values.
 Appropriations schedule row from the full capture. Its explicit `CANCELED` title
 prefix exercises cancelled status and source-based review warnings; synthetic
 variants exercise optional metadata and reject malformed metadata.
+
+### Macon Water Authority
+
+`macon-water/listing.json` is the official Diligent Community public meeting
+listing for October 2026, retrieved October 27, 2026 from
+`https://macon-water.community.diligentoneplatform.com/Services/MeetingsService.svc/meetings?from=2026-10-01&to=2026-10-31`.
+`macon-water/documents.json` is meeting 272's `meetingDocuments` response, with
+all entries not explicitly public removed. The public agenda HTML and attachment
+links are retained. PDF bytes in offline tests are synthetic; private-document
+and failure cases are synthetic mutations. Tests never access the live portal.
