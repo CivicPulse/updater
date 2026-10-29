@@ -90,6 +90,31 @@ Appropriations schedule row from the full capture. Its explicit `CANCELED` title
 prefix exercises cancelled status and source-based review warnings; synthetic
 variants exercise optional metadata and reject malformed metadata.
 
+## Georgia SOS turnout
+
+`georgia-turnout/tables.json` projects public aggregate Qlik responses sampled
+October 26, 2026 from the dashboard linked by
+`https://sos.ga.gov/page/election-data-hub-unofficial-turnout`:
+`https://d11khjvhu86vzz.cloudfront.net/DH.ELECTION2024/index.html`.
+App `137c0a43-928b-427a-a267-eb55aa7fa8a9` was explicitly filtered to November 3,
+2026. The source footnote read `10/26/2026 6:34:58 PM`.
+
+The fixture retains the original hypercube definitions, source table IDs/titles,
+column labels, footnotes and first two data rows of the county early-voting,
+county absentee and county/ballot-style turnout tables. Layouts are projected to
+these fields and their row counts adjusted to two; other layout properties and
+remaining rows are omitted. It is not a full state/election snapshot. Values and
+official formulas were not fabricated. Election listings, handles, selection
+metadata and RPC envelopes in tests are synthetic. No authentication responses,
+bearer headers, session cookies or individual voter records are included.
+
+The local TLS WebSocket integration test exercises the actual pinned socket,
+hostname/SNI verification, frame decoding, selection, capture and offline replay
+using these projected responses. It never contacts SOS/Qlik. Other tests cover
+schema/selection changes, reloads, incomplete matrices, duplicate dimensions,
+invalid counts, null handling, paginated data, cumulative downward corrections,
+local review warnings, request/byte/notification limits, and token exclusion.
+
 ### Macon Water Authority
 
 `macon-water/listing.json` is the official Diligent Community public meeting

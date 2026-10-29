@@ -2,7 +2,7 @@
 
 An independent Python collector for official civic data. Version 0.1 collects
 configured civic events, official commission/school-board meetings, and Georgia
-legislative records, preserves their evidence, and
+legislative records and unofficial Georgia SOS turnout, preserves their evidence, and
 creates local review proposals. **It cannot upload to Civic Pulse.** Approving a
 proposal records a local decision only; `publish` always exits with code 4.
 
@@ -519,6 +519,83 @@ The website's API and anonymous handshake are undocumented and may change. Sourc
 validation checks configuration, not network availability or completeness. Live
 endpoint samples and offline fixture validation are described in
 [Georgia connector validation](docs/georgia-legislature-validation-2026-10-26.md).
+
+## Georgia SOS turnout
+
+```sh
+uv run --locked civpulse-updater sources validate georgia-sos-turnout
+uv run --locked civpulse-updater collect georgia-sos-turnout --from 2026-11-03 --to 2026-11-03
+uv run --locked civpulse-updater changes list
+uv run --locked civpulse-updater replay RUN_ID
+```
+
+The `georgia-sos-turnout` adapter starts the Georgia Secretary of State voter and
+election import pipeline with **aggregate, unofficial turnout** from the public
+[Election Data Hub](https://sos.ga.gov/page/election-data-hub-unofficial-turnout).
+The source manifest points directly to the dashboard linked by that page. The
+page itself currently rejects the updater's direct HTTP request.
+
+**Dates select election dates**, inclusively, rather than ballot-casting dates or
+snapshot dates. For example, the command above captures the currently reported
+November 3 election aggregates, including early voting observed before Election
+Day. It does not reconstruct a past daily snapshot. Only election dates currently
+exposed by the dashboard are available; an empty selection window is not evidence
+that no election occurred.
+
+Each selected election produces three `record_type: "turnout"` table snapshots:
+
+- Early in-person ballots accepted, by county.
+- Absentee activity by county: requested, issued, returned, accepted, rejected,
+  spoiled/canceled, outstanding, and the source acceptance ratio.
+- Turnout by county and the source's grouped ballot style.
+
+Each snapshot contains sorted dimension rows, numeric values and original display
+text, the public table ID, official measure/dimension definitions, and the table's
+as-of footnote when supplied. Ratios remain ratios (for example, `1` displayed as
+`100.00%`); null/NaN measures remain null. Missing counties/ballot styles are never
+filled with zero: source tables can suppress zero/missing rows. The table's
+source expressions determine which ballot categories and dates it includes;
+these three tables must not be added together. No candidate vote totals or
+certified election outcomes are inferred from participation counts.
+
+Stable identities combine election date and table key. A later cumulative
+correction, including a lower count, replaces the prior table through the normal
+local review workflow. Repeating unchanged data or replaying a run produces no
+extra proposals. All turnout records explicitly carry `unofficial: true` and
+review warnings; approval requires acknowledging those warnings. Publication
+remains disabled, and no Civic Pulse database connection is made.
+
+The collector uses the dashboard's anonymous **Go Interactive** token endpoint
+and Qlik's TLS WebSocket API. The token remains in memory. Only three pinned public
+aggregate objects are read; selections and a temporary selection-metadata object
+exist only in that session. No persistent Qlik objects, measures, or data are
+written. The app ID, hosts and dimension definitions are pinned; unexpected
+schemas require inspection and a connector update.
+
+The original bootstrap files and RPC requests/responses are content-addressed
+private evidence. A complete snapshot embeds its ordered RPC transcript for
+network-free replay. Transport metadata distinguishes Qlik `RPC` frames from
+HTTP requests. Authentication responses and bearer headers are excluded from
+saved evidence and WebSocket wire logging. DNS addresses are validated and pinned
+while TLS still verifies the official hostname; WebSocket redirects/proxies are
+not followed. Every RPC is paced and counted, and frames, aggregate bytes,
+notifications, response time, election count and table rows are bounded.
+
+The manifest permits 1,500 total HTTP/RPC requests, 20 MB per response/snapshot,
+100 MB total network response bytes, and at least one second between requests.
+There are at most 100 listed elections, 2,000 rows per table and 1,000 cells per
+page. Broad date windows take longer and may exhaust these ceilings; prefer one
+election per run. Each capture uses one complete transcript: failed selections,
+short pages, changed layouts, extra dashboard filters, source reloads or download
+failures withhold that capture's proposals and preserve previous records. Failed
+incomplete captures require a fresh collection; successful captures support
+normal offline replay.
+
+This first increment excludes registration statistics, individual voter/history
+files, demographic charts, certified results, scheduling and publication. Add
+those as separate source contracts rather than treating turnout as voter records.
+Live and offline validation are recorded in
+[Georgia turnout validation](docs/georgia-sos-turnout-validation-2026-10-26.md).
 
 ## Macon Water Authority
 

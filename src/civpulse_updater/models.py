@@ -117,9 +117,9 @@ class ListingRequest(Model):
 
 
 class Evidence(Model):
-    method: Literal["GET", "POST"] = "GET"
+    method: Literal["GET", "POST", "RPC"] = "GET"
     direction: Literal["request", "response"] = "response"
-    transport: Literal["http", "playwright"] = "http"
+    transport: Literal["http", "playwright", "qlik"] = "http"
     sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     url: str
     redirects: tuple[str, ...] = ()
@@ -196,8 +196,27 @@ class LegislativeRecord(Model):
         return json.dumps([self.uid, None], separators=(",", ":"))
 
 
+class TurnoutRecord(Model):
+    """Aggregate election table; never an individual voter record."""
+
+    schema_version: Literal[1] = 1
+    source_id: str
+    uid: str = Field(min_length=1, max_length=1000)
+    record_type: Literal["turnout"] = "turnout"
+    title: str = Field(min_length=1, max_length=10000)
+    source_url: str
+    election_date: date
+    unofficial: Literal[True] = True
+    data: dict[str, JsonValue]
+    warnings: tuple[str, ...] = ()
+
+    @property
+    def external_id(self) -> str:
+        return json.dumps([self.uid, None], separators=(",", ":"))
+
+
 class Envelope(Model):
-    event: Event | LegislativeRecord
+    event: Event | LegislativeRecord | TurnoutRecord
     evidence_hashes: tuple[str, ...]
     parser_version: str
     locator: str

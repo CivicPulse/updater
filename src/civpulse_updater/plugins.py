@@ -19,6 +19,7 @@ def load_adapter(config: SourceConfig) -> Adapter:
     from .adapters.bibb_democrats import BibbDemocrats
     from .adapters.civicclerk import CivicClerk
     from .adapters.georgia_legislature import GeorgiaLegislature
+    from .adapters.georgia_turnout import GeorgiaTurnout
     from .adapters.macon_water import MaconWater
     from .adapters.simbli import Simbli
 
@@ -28,6 +29,7 @@ def load_adapter(config: SourceConfig) -> Adapter:
         "simbli": Simbli,
         "macon-water-authority": MaconWater,
         "georgia-legislature": GeorgiaLegislature,
+        "georgia-sos-turnout": GeorgiaTurnout,
     }
     for entry in entry_points(group="civpulse_updater.sources"):
         if entry.name in config.enabled_plugins:

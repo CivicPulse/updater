@@ -129,6 +129,15 @@ def collect(
                 state.observe(run, evidence.model_dump(mode="json"))
 
             fetcher = GeorgiaFetcher(config, capture)
+        elif config.adapter == "georgia-sos-turnout":
+            from .turnout_transport import GeorgiaTurnoutFetcher
+
+            def capture(body, evidence):
+                if store.put(body) != evidence.sha256:
+                    raise ValueError("Turnout evidence mismatch")
+                state.observe(run, evidence.model_dump(mode="json"))
+
+            fetcher = GeorgiaTurnoutFetcher(config, window, capture)
         else:
             fetcher = Fetcher(config)
     inputs, errors, refs = [], [], {}
