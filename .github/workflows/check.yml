@@ -32,7 +32,8 @@ jobs:
       - run: trivy image --scanners vuln --severity HIGH,CRITICAL --exit-code 1 civpulse-updater:check
 
   browser:
-    runs-on: ubuntu-latest
+    # Chromium requires unprivileged user namespaces for its sandbox.
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
