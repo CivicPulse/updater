@@ -183,10 +183,17 @@ class GeorgiaTurnoutFetcher(Fetcher):
                 logger=logging.Logger("civpulse.qlik", level=logging.CRITICAL + 1),
             ) as ws:
                 client = QlikClient(ws, self)
-                read_tables(client, self.window)
+                read_tables(
+                    client, self.window, current=self.config.qlik_current_election
+                )
         body = canonical(
             {
-                "schema_version": 1,
+                "schema_version": 2 if self.config.qlik_current_election else 1,
+                **(
+                    {"selection": "current-election"}
+                    if self.config.qlik_current_election
+                    else {}
+                ),
                 "app_id": APP,
                 "window": self.window.model_dump(mode="json"),
                 "bootstrap": bootstrap,

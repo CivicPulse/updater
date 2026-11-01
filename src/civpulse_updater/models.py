@@ -45,9 +45,15 @@ class SourceConfig(Model):
     request_interval: float = Field(default=0.25, ge=0.25, le=10)
     enabled_plugins: tuple[str, ...] = ()
     legislature_session_id: int | None = Field(default=None, ge=1)
+    qlik_all_history: bool = False
+    qlik_current_election: bool = False
 
     @model_validator(mode="after")
     def browser_scope(self):
+        if self.qlik_all_history and self.adapter != "georgia-sos-registration":
+            raise ValueError("Summarized history requires the registration adapter")
+        if self.qlik_current_election and self.adapter != "georgia-sos-turnout":
+            raise ValueError("Current election selection requires the turnout adapter")
         if self.adapter != "georgia-legislature" and (
             self.max_events > 500 or self.max_requests > 5000 or self.max_pages > 50
         ):
@@ -215,8 +221,26 @@ class TurnoutRecord(Model):
         return json.dumps([self.uid, None], separators=(",", ":"))
 
 
+class RegistrationRecord(Model):
+    """Aggregate voter registration snapshot; never an individual voter record."""
+
+    schema_version: Literal[1] = 1
+    source_id: str
+    uid: str = Field(min_length=1, max_length=1000)
+    record_type: Literal["registration"] = "registration"
+    title: str = Field(min_length=1, max_length=10000)
+    source_url: str
+    as_of_date: date
+    data: dict[str, JsonValue]
+    warnings: tuple[str, ...] = ()
+
+    @property
+    def external_id(self) -> str:
+        return json.dumps([self.uid, None], separators=(",", ":"))
+
+
 class Envelope(Model):
-    event: Event | LegislativeRecord | TurnoutRecord
+    event: Event | LegislativeRecord | TurnoutRecord | RegistrationRecord
     evidence_hashes: tuple[str, ...]
     parser_version: str
     locator: str

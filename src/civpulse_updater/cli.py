@@ -324,3 +324,48 @@ def probe_simbli_attachment(
     emit(result)
     if not result["recovered"]:
         raise typer.Exit(1)
+
+
+@app.command("capture-qlik")
+@guarded
+def capture_qlik(
+    source: Annotated[
+        str, typer.Argument(help="all, turnout, or registration")
+    ] = "all",
+    max_requests: Annotated[int, typer.Option(min=50, max=5000)] = 1500,
+    max_total_bytes: Annotated[
+        int, typer.Option(min=1000000, max=1000000000)
+    ] = 100000000,
+):
+    """Download numerical summaries and summarized registration history only."""
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    from .qlik_statistics import collect_statistics
+
+    if source not in ("all", "turnout", "registration"):
+        raise ValueError("Unknown public Qlik source")
+    with local_state() as state:
+        result = collect_statistics(
+            state,
+            EvidenceStore(settings.state_dir / "evidence"),
+            settings.sources_dir,
+            source,
+            datetime.now(ZoneInfo("America/New_York")).date(),
+            max_requests=max_requests,
+            max_total_bytes=max_total_bytes,
+        )
+    emit(result)
+    if result["status"] != "complete":
+        raise typer.Exit(1)
+
+
+@app.command("verify-qlik")
+@guarded
+def verify_qlik(snapshot: str):
+    """Verify archived Qlik bytes and page coverage without network access."""
+    from .qlik_archive import verify_archive
+
+    with local_state():
+        result = verify_archive(settings.state_dir / "qlik-archive", snapshot)
+    emit(result)

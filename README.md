@@ -643,3 +643,77 @@ archive. Missing records never delete prior observations. No browser fallback or
 systematic capture profile is enabled. Default limits are 100 meetings, 500
 supporting resources, 100 MB per response, 500 MB total and one-second pacing.
 See [validation notes](docs/macon-water-validation-2026-10-27.md).
+
+## Georgia Qlik statistics summaries
+
+```sh
+uv run --locked civpulse-updater capture-qlik all
+```
+
+This is the default, compact download for the SOS turnout and registration
+pages. It fetches **numerical summaries**, with no rendered charts, map geometry,
+chart inventories, raw voter/linkage tables, raw historical tables, or exhaustive
+field-value dumps. Aggregation happens in Qlik before data is transferred.
+
+The bundle contains:
+
+- Latest active/inactive registration counts by county.
+- Separate current county/status summaries for race, gender and age group,
+  avoiding the much larger joint demographic cross product.
+- County/status/municipal-precinct counts where that field is populated. Missing,
+  empty and `-` precinct groups are omitted and recorded as an omission count;
+  county totals are retained. Municipal precincts are not county election
+  precincts; Bibb currently has no usable breakdown in that field.
+- County/status registration totals for every available historical snapshot date,
+  using the published monthly measure, including its July 2025 correction. The
+  current source exposes 56 dates, approximately 18,000 historical county/status
+  rows rather than its 9.3-million-row underlying model table.
+- Current-election early-voting counts, absentee activity and turnout by county
+  and ballot style. "Current" selects the next advertised election on/after today
+  in America/New_York, or the latest advertised election when none is upcoming.
+
+The data is saved as `qlik-statistics-all.json` under the state directory, alongside
+SHA-256-addressed evidence and local review proposals. Every bundle is rebuilt
+from the exact run's stored evidence, so old wider datasets are not accidentally
+included. Combined-source failure preserves the last successful bundle instead
+of replacing it with partial results. Repeating unchanged source data creates no
+additional review proposals. Approvals remain local; publishing is unavailable.
+
+```sh
+uv run --locked civpulse-updater capture-qlik registration
+uv run --locked civpulse-updater capture-qlik turnout
+uv run --locked civpulse-updater replay RUN_ID
+```
+
+The first two commands write `qlik-statistics-registration.json` and
+`qlik-statistics-turnout.json`, respectively. The combined command includes all
+available **summarized registration history**, without a raw-history download or
+a one-year date cutoff. Turnout is limited to one election in this command.
+
+For an explicit date window, the original collection commands remain available:
+
+```sh
+uv run --locked civpulse-updater collect georgia-sos-registration --from 2026-10-01 --to 2026-11-01
+uv run --locked civpulse-updater collect georgia-sos-turnout --from 2026-11-03 --to 2026-11-03
+```
+
+Registration dates select snapshot labels and the live app's reload date; turnout
+dates select elections. Explicit registration collections also use the compact
+profile: separate current summaries plus county/status history only. A historical
+window does not reconstruct an earlier live electorate. Missing/suppressed rows
+are not zero, demographic tables overlap, and distinct counts may not be additive.
+Source snapshot dates and reload timestamps are retained, since the live and
+monthly registration apps can have different freshness.
+
+`capture-qlik` no longer invokes the full-archive exporter. Its retired
+`--inventory-only` flag is rejected. Existing full/partial archives and older
+aggregate captures are preserved for audit, not automatically resumed or deleted.
+`verify-qlik SNAPSHOT_ID` still verifies old archives offline. Old schema-1
+registration and turnout evidence remains replayable; new compact registration
+and current-election captures record their scope explicitly as schema 2.
+
+Default summary budgets are 1,500 requests and 100 MB received **per source**, with
+normal source pacing. `--max-requests` and `--max-total-bytes` can adjust these
+bounds; individual voter identifiers are never returned as data dimensions. The
+source's published table measure definitions and original aggregate RPC evidence
+are retained, without downloading visual assets or native chart/map exports.

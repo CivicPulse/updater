@@ -24,6 +24,8 @@ def resume_identity(config: SourceConfig):
         config.allowed_hosts,
         config.timezone,
         config.legislature_session_id,
+        config.qlik_all_history,
+        config.qlik_current_election,
     )
 
 
@@ -129,6 +131,15 @@ def collect(
                 state.observe(run, evidence.model_dump(mode="json"))
 
             fetcher = GeorgiaFetcher(config, capture)
+        elif config.adapter == "georgia-sos-registration":
+            from .registration_transport import GeorgiaRegistrationFetcher
+
+            def capture(body, evidence):
+                if store.put(body) != evidence.sha256:
+                    raise ValueError("Registration evidence mismatch")
+                state.observe(run, evidence.model_dump(mode="json"))
+
+            fetcher = GeorgiaRegistrationFetcher(config, window, capture)
         elif config.adapter == "georgia-sos-turnout":
             from .turnout_transport import GeorgiaTurnoutFetcher
 

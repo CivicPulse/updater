@@ -199,7 +199,7 @@ def table(client, app_handle, key):
     }, missing
 
 
-def read_tables(client, window):
+def read_tables(client, window, *, current=False):
     app_handle = client.call(-1, "OpenDoc", [APP])["qReturn"]["qHandle"]
     before = client.call(app_handle, "GetAppLayout", [])["qLayout"]
     if (
@@ -213,6 +213,15 @@ def read_tables(client, window):
     wanted = [
         (day, elem) for day, elem, _ in available if window.start <= day <= window.end
     ]
+    if current:
+        upcoming = sorted(
+            (day, elem) for day, elem, _ in available if day >= window.start
+        )
+        wanted = (
+            upcoming[:1]
+            if upcoming
+            else [max((day, elem) for day, elem, _ in available)]
+        )
     results = []
     selections_handle = None
     if wanted:
@@ -301,7 +310,7 @@ class GeorgiaTurnout:
 
     def discover(self, content, url, sha):
         data = json.loads(content)
-        if url != HUB or data["schema_version"] != 1 or data["app_id"] != APP:
+        if url != HUB or data["schema_version"] not in (1, 2) or data["app_id"] != APP:
             raise ValueError("Unexpected turnout snapshot")
         return [Reference(url=url, page_url=url, listing_hash=sha)], []
 
@@ -313,13 +322,16 @@ class GeorgiaTurnout:
         if (
             not self.uses_listing_content(ref)
             or sha != ref.listing_hash
-            or data["schema_version"] != 1
+            or data["schema_version"] not in (1, 2)
             or data["app_id"] != APP
             or data["window"] != window.model_dump(mode="json")
         ):
             raise ValueError("Turnout snapshot identity mismatch")
         client = SavedClient(data["messages"])
-        tables = read_tables(client, window)
+        current = data["schema_version"] == 2
+        if current and data.get("selection") != "current-election":
+            raise ValueError("Unexpected turnout summary scope")
+        tables = read_tables(client, window, current=current)
         client.finish()
         records = []
         for day, table_data, missing in tables:
