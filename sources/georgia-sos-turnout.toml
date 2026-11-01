@@ -1,0 +1,17 @@
+schema_version = 1
+id = "georgia-sos-turnout"
+adapter = "georgia-sos-turnout"
+protocol_version = 1
+# Public dashboard linked by the Georgia SOS unofficial turnout page.
+url = "https://d11khjvhu86vzz.cloudfront.net/DH.ELECTION2024/index.html"
+allowed_hosts = ["d11khjvhu86vzz.cloudfront.net", "sos-ga-gov.us.qlikcloudgov.com"]
+timezone = "America/New_York"
+mode = "review-only"
+max_requests = 1500
+max_pages = 1
+max_events = 1
+max_resources = 100
+max_bytes = 20000000
+max_total_bytes = 100000000
+response_seconds = 30
+request_interval = 1.0

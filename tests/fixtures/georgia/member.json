@@ -1,0 +1,314 @@
+{
+  "displayName": "Solomon Adesanya",
+  "title": "Minority Caucus Treasurer",
+  "dateVacated": null,
+  "residence": "Marietta",
+  "capitolAddress": {
+    "address1": "509-E Coverdell Legislative Office Bldg.",
+    "address2": null,
+    "city": "Atlanta",
+    "state": "GA",
+    "zip": "30334     ",
+    "phone": "4046560220",
+    "fax": null,
+    "email": "solomon.adesanya@house.ga.gov"
+  },
+  "homePhone": null,
+  "cellPhone": null,
+  "occupation": "Business Owner",
+  "email": "solomon.adesanya@house.ga.gov",
+  "party": 0,
+  "chamber": 1,
+  "districtNumber": 43,
+  "districtSuffix": "rd",
+  "districtMap": null,
+  "committeeMemberships": [
+    {
+      "committee": {
+        "id": 144,
+        "sessionId": 1033,
+        "name": "Economic Development & Tourism",
+        "chamber": 1
+      },
+      "dateVacated": null,
+      "role": "Member"
+    },
+    {
+      "committee": {
+        "id": 92,
+        "sessionId": 1033,
+        "name": "Governmental Affairs",
+        "chamber": 1
+      },
+      "dateVacated": null,
+      "role": "Member"
+    },
+    {
+      "committee": {
+        "id": 181,
+        "sessionId": 1033,
+        "name": "Small Business Development",
+        "chamber": 1
+      },
+      "dateVacated": null,
+      "role": "Member"
+    }
+  ],
+  "committeeMembershipsArchive": [],
+  "biography": null,
+  "press": "https://house-press.com/representative/Solomon-Adesanya",
+  "photos": [
+    {
+      "type": 1,
+      "url": "https://www.legis.ga.gov/api/images/default-source/portraits/adesanya-solomon-5025.jpg"
+    },
+    {
+      "type": 2,
+      "url": "https://www.legis.ga.gov/api/images/default-source/portraits/adesanya-solomon-5025.jpg?size=mpSm"
+    },
+    {
+      "type": 3,
+      "url": "https://www.legis.ga.gov/api/images/default-source/portraits/adesanya-solomon-5025.jpg?size=mpLg"
+    }
+  ],
+  "otherInformation": null,
+  "sessionsInService": [
+    {
+      "session": {
+        "id": 1033,
+        "isCurrent": true,
+        "description": "2025-2026 Regular Session",
+        "library": "20252026",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 144,
+            "sessionId": 1033,
+            "name": "Economic Development & Tourism",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 92,
+            "sessionId": 1033,
+            "name": "Governmental Affairs",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 181,
+            "sessionId": 1033,
+            "name": "Small Business Development",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        }
+      ],
+      "title": null,
+      "chamber": 1,
+      "districtMap": {
+        "districtId": 59,
+        "isCurrent": true,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/house/house-2023/43"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 1034,
+        "isCurrent": false,
+        "description": "2026 Special Session",
+        "library": "2026EX",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 144,
+            "sessionId": 1033,
+            "name": "Economic Development & Tourism",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 92,
+            "sessionId": 1033,
+            "name": "Governmental Affairs",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 181,
+            "sessionId": 1033,
+            "name": "Small Business Development",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        }
+      ],
+      "title": null,
+      "chamber": 1,
+      "districtMap": {
+        "districtId": 59,
+        "isCurrent": true,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/house/house-2023/43"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 1032,
+        "isCurrent": false,
+        "description": "2023 Special Session",
+        "library": "2023EX",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 144,
+            "sessionId": 1033,
+            "name": "Economic Development & Tourism",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 94,
+            "sessionId": 1033,
+            "name": "Intragovernmental Coordination",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 181,
+            "sessionId": 1033,
+            "name": "Small Business Development",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        }
+      ],
+      "title": null,
+      "chamber": 1,
+      "districtMap": {
+        "districtId": 59,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/house/house-prop1-2021/43"
+        }
+      }
+    },
+    {
+      "session": {
+        "id": 1031,
+        "isCurrent": false,
+        "description": "2023-2024 Regular Session",
+        "library": "20232024",
+        "type": 0,
+        "sessionSuffix": null
+      },
+      "committeeMemberships": [
+        {
+          "committee": {
+            "id": 144,
+            "sessionId": 1033,
+            "name": "Economic Development & Tourism",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 94,
+            "sessionId": 1033,
+            "name": "Intragovernmental Coordination",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        },
+        {
+          "committee": {
+            "id": 181,
+            "sessionId": 1033,
+            "name": "Small Business Development",
+            "chamber": 1
+          },
+          "dateVacated": null,
+          "role": "Member"
+        }
+      ],
+      "title": null,
+      "chamber": 1,
+      "districtMap": {
+        "districtId": 59,
+        "isCurrent": false,
+        "link": {
+          "linkType": 3,
+          "url": "https://www.legis.ga.gov/api/document/district-maps/house/house-prop1-2021/43"
+        }
+      }
+    }
+  ],
+  "birthday": "July 12",
+  "education": null,
+  "spouse": "Ashleigh",
+  "religion": null,
+  "staff": "<a href=\"mailto:myckelia.rose@house.ga.gov\">Myckelia Rose - Legislative Assistant<span class=\"sr-only\">email</span></a>",
+  "legislativeComments": null,
+  "freeForm1": null,
+  "freeForm2": null,
+  "contextSessionId": 1033,
+  "constituentServices": null,
+  "id": 5025,
+  "name": {
+    "first": "Solomon",
+    "last": "Adesanya",
+    "middle": null,
+    "nickname": null,
+    "suffix": null,
+    "familyName": "Adesanya"
+  },
+  "districtAddress": {
+    "address1": "P.O. Box 674808",
+    "address2": null,
+    "city": "Marietta",
+    "state": "GA",
+    "zip": "30006     ",
+    "phone": null,
+    "fax": null,
+    "email": "solomon.adesanya@house.ga.gov"
+  }
+}

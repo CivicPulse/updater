@@ -1,0 +1,112 @@
+{
+  "id": 69281,
+  "session": {
+    "id": 1033,
+    "isCurrent": true,
+    "description": "2025-2026 Regular Session",
+    "library": "20252026",
+    "type": 1,
+    "sessionSuffix": null
+  },
+  "chamber": 1,
+  "number": "1",
+  "title": "Pediatric Health Safe Storage Act; enact",
+  "status": "House Second Readers",
+  "firstReader": "A BILL to be entitled an Act to amend Part 3 of Article 4 of Chapter 11 of Title 16 of the Official Code of Georgia Annotated, relating to carrying and possession of firearms, so as to establish the offense of making a firearm accessible to a child; to provide for definitions; to provide for exceptions and affirmative defenses; to provide for criminal penalties; to require a notice by certain firearm dealers; to provide for a short title; to provide for related matters; to repeal conflicting laws; and for other purposes. ",
+  "footnotes": "",
+  "suffix": "",
+  "documentType": 1,
+  "sponsors": [
+    {
+      "id": 274551,
+      "name": "Au, Michelle ",
+      "memberId": 4983,
+      "sequence": 1,
+      "sponsorType": 1,
+      "chamber": 1,
+      "district": "50th",
+      "sessionId": 1033
+    },
+    {
+      "id": 276438,
+      "name": "Cooper, Sharon ",
+      "memberId": 86,
+      "sequence": 2,
+      "sponsorType": 1,
+      "chamber": 1,
+      "district": "45th",
+      "sessionId": 1033
+    },
+    {
+      "id": 276439,
+      "name": "Oliver, Mary Margaret ",
+      "memberId": 181,
+      "sequence": 3,
+      "sponsorType": 1,
+      "chamber": 1,
+      "district": "84th",
+      "sessionId": 1033
+    },
+    {
+      "id": 276440,
+      "name": "Crawford, Omari ",
+      "memberId": 5036,
+      "sequence": 4,
+      "sponsorType": 1,
+      "chamber": 1,
+      "district": "89th",
+      "sessionId": 1033
+    },
+    {
+      "id": 276476,
+      "name": "Neal, Yasmin ",
+      "memberId": 765,
+      "sequence": 5,
+      "sponsorType": 1,
+      "chamber": 1,
+      "district": "79th",
+      "sessionId": 1033
+    },
+    {
+      "id": 276441,
+      "name": "Westbrook, Anne Allen ",
+      "memberId": 5054,
+      "sequence": 6,
+      "sponsorType": 1,
+      "chamber": 1,
+      "district": "163rd",
+      "sessionId": 1033
+    }
+  ],
+  "versions": [
+    {
+      "id": 229744,
+      "name": "LC 56 0217/a",
+      "versionNumber": 2,
+      "isCurrent": false
+    }
+  ],
+  "committees": [
+    {
+      "id": 129,
+      "sessionId": 0,
+      "name": "Public Safety and Homeland Security",
+      "chamber": 1
+    }
+  ],
+  "statusHistory": [
+    {
+      "date": "2025-01-15T10:15:29",
+      "name": "House Second Readers"
+    },
+    {
+      "date": "2025-01-14T11:42:47",
+      "name": "House First Readers"
+    },
+    {
+      "date": "2025-01-13T13:03:11",
+      "name": "House Hopper"
+    }
+  ],
+  "votes": null
+}

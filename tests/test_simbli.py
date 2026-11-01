@@ -523,6 +523,53 @@ def test_invalid_download_is_evidence_but_not_a_resume_checkpoint(
     )
 
 
+def test_unavailable_attachment_does_not_hide_other_public_documents(
+    tmp_path, source, window
+):
+    class TwoAttachments(Feed):
+        def get(self, url):
+            body, evidence = super().get(url)
+            path = urlsplit(url).path
+            if "GetMeetingItemDetailsModel" in path:
+                data = json.loads(body)
+                for field in data["ItemContents"]:
+                    if field["Attachments"]:
+                        field["Attachments"].append(
+                            dict(
+                                self.attachment,
+                                AttachmentID=124,
+                                Title="Second exhibit",
+                            )
+                        )
+                body = json.dumps(data).encode()
+            elif path.endswith("Attachment.aspx") and "AID=123&" in url:
+                body = b"<html><title>Attachment</title></html>"
+            return body, evidence.model_copy(
+                update={"sha256": digest(body), "size": len(body)}
+            )
+
+    feed = TwoAttachments()
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    first = collect(state, store, source, window, feed)
+    assert first["status"] == "failed" and first["records"] == 0
+    assert any("AID=124&" in url for url in feed.calls)
+    assert sum("AID=123&" in url for url in feed.calls) == 1
+    entry = json.loads(
+        state.rows("SELECT inputs FROM runs WHERE id=:id", id=first["run_id"])[0][
+            "inputs"
+        ]
+    )[0]
+    assert entry["complete"] is False
+    assert any("AID=124&" in url for url in entry["resources"])
+    assert not any("AID=123&" in url for url in entry["resources"])
+    assert not state.rows("SELECT * FROM changes")
+    restored = Feed()
+    result = collect(state, store, source, window, restored, resume_run=first["run_id"])
+    assert result["status"] == "complete" and result["records"] == 1
+    assert any("AID=123&" in url for url in restored.calls)
+    assert not any("AID=124&" in url for url in restored.calls)
+
+
 def test_resume_cannot_erase_incomplete_discovery(tmp_path, source, window):
     feed = Feed()
     source = source.model_copy(update={"max_events": 1})
@@ -571,6 +618,18 @@ def test_office_attachment_is_preserved_without_execution(tmp_path, source, wind
     assert store.read(digest(feed.pdf)) == feed.pdf
 
 
+def test_whole_board_training_is_collected(tmp_path, source, window):
+    feed = Feed()
+    for row in feed.rows:
+        if row["Master_MeetingID"] == 138067:
+            row["ML_TypeTitle"] = "Training Meeting"
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    result = collect(state, store, source, window, feed)
+    assert result["status"] == "complete" and result["records"] == 1
+    record = json.loads(state.rows("SELECT payload FROM records")[0]["payload"])
+    assert any(d["role"] == "Minutes" for d in record["documents"])
+
+
 @pytest.mark.parametrize("extension", ["doc", "xls", "ppt"])
 def test_legacy_office_signature_is_validated(tmp_path, source, window, extension):
     feed = Feed()
@@ -585,6 +644,34 @@ def test_legacy_office_signature_is_validated(tmp_path, source, window, extensio
 def test_unknown_attachment_type_stops_before_download(tmp_path, source, window):
     feed = Feed()
     feed.attachment["FileName"] = "program.exe"
+    result = collect(
+        State(tmp_path), EvidenceStore(tmp_path / "evidence"), source, window, feed
+    )
+    assert result["status"] == "failed"
+    assert not any("/Meetings/Attachment.aspx" in u for u in feed.calls)
+
+
+@pytest.mark.parametrize("filename", [None, ""])
+def test_historical_attachment_uses_explicit_extension(
+    tmp_path, source, window, filename
+):
+    feed = Feed()
+    feed.attachment.update(FileName=filename, FileExtension="pdf")
+    state, store = State(tmp_path), EvidenceStore(tmp_path / "evidence")
+    result = collect(state, store, source, window, feed)
+    assert result["status"] == "complete"
+    assert any("/Meetings/Attachment.aspx" in u for u in feed.calls)
+    assert store.read(digest(feed.pdf)) == feed.pdf
+    feed.pdf = b"not a PDF"
+    assert collect(state, store, source, window, feed)["status"] == "failed"
+
+
+@pytest.mark.parametrize("extension", [None, "exe", "../pdf", 1])
+def test_historical_attachment_rejects_invalid_extension(
+    tmp_path, source, window, extension
+):
+    feed = Feed()
+    feed.attachment.update(FileName=None, FileExtension=extension)
     result = collect(
         State(tmp_path), EvidenceStore(tmp_path / "evidence"), source, window, feed
     )

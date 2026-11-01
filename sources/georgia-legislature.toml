@@ -1,0 +1,14 @@
+id = "georgia-legislature"
+adapter = "georgia-legislature"
+url = "https://www.legis.ga.gov/api/sessions"
+allowed_hosts = ["www.legis.ga.gov"]
+legislature_session_id = 1033 # 2025-2026 Regular Session; deliberately pinned
+timezone = "America/New_York"
+mode = "review-only"
+max_pages = 100
+max_events = 10000
+max_requests = 10000
+max_resources = 1000
+max_bytes = 20000000
+max_total_bytes = 1000000000
+request_interval = 1.0

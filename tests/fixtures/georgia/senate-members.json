@@ -1,0 +1,44 @@
+[
+  {
+    "district": {
+      "id": 292,
+      "number": 56,
+      "chamberType": 2,
+      "suffix": "th"
+    },
+    "party": 1,
+    "photos": [
+      {
+        "type": 2,
+        "url": "https://www.legis.ga.gov/api/images/default-source/portraits/albers-john-754.jpg?size=mpSm"
+      }
+    ],
+    "lastName": "Albers",
+    "firstName": "John",
+    "districtNumber": 56,
+    "city": "Roswell ",
+    "fullName": "John Albers",
+    "sessionId": 1033,
+    "id": 754,
+    "name": {
+      "first": "John",
+      "last": "Albers",
+      "middle": null,
+      "nickname": null,
+      "suffix": null,
+      "familyName": "Albers"
+    },
+    "districtAddress": {
+      "address1": "None Listed",
+      "address2": null,
+      "city": null,
+      "state": null,
+      "zip": null,
+      "phone": null,
+      "fax": null,
+      "email": null
+    },
+    "residence": "Roswell ",
+    "dateVacated": null
+  }
+]

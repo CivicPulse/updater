@@ -9,7 +9,7 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy import create_engine, text
 
-from .models import Envelope, canonical, digest
+from .models import Envelope, Event, canonical, digest
 
 
 def now() -> str:
@@ -95,7 +95,7 @@ class State:
             for envelope in envelopes:
                 event = envelope.event
                 normalized = event.model_dump(mode="json")
-                if not event.documents:
+                if isinstance(event, Event) and not event.documents:
                     normalized.pop("documents")  # Preserve pre-document event hashes.
                 payload = canonical(normalized)
                 sha = digest(payload.encode())

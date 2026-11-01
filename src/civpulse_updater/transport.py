@@ -123,6 +123,7 @@ class Fetcher:
         max_bytes=None,
         method="GET",
         content=None,
+        body_statuses=(200,),
     ):
         """One pinned request, no redirects/retries; POST restricted to verification."""
         host = self.validate_request(url, method, content)
@@ -171,7 +172,9 @@ class Fetcher:
                             )
                     data = bytearray()
                     for chunk in (
-                        response.iter_raw() if response.status_code == 200 else ()
+                        response.iter_raw()
+                        if response.status_code in body_statuses
+                        else ()
                     ):
                         self.consume(len(chunk))
                         data.extend(chunk)

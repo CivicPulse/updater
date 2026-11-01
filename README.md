@@ -1,7 +1,8 @@
 # Civic Pulse updater
 
 An independent Python collector for official civic data. Version 0.1 collects
-configured civic events and official commission/school-board meeting records, preserves their evidence, and
+configured civic events, official commission/school-board meetings, and Georgia
+legislative records and unofficial Georgia SOS turnout, preserves their evidence, and
 creates local review proposals. **It cannot upload to Civic Pulse.** Approving a
 proposal records a local decision only; `publish` always exits with code 4.
 
@@ -108,7 +109,7 @@ versions are rejected. Plugins execute trusted Python code and are not sandboxed
 Install them through uv and commit the resulting lockfile.
 
 The current source config and protocol are intentionally small. There is no API
-publisher, authentication setup, scheduler, OCR worker, roster importer,
+publisher, account authentication setup, scheduler, OCR worker,
 or automatic approval policy in this release. Conditional HTTP caching and
 adaptive polling from the broader plan are deferred. Add future schema changes
 as Alembic revisions; never edit a migration after distributing it.
@@ -158,8 +159,11 @@ uv run civpulse-updater replay RUN_ID
 ```
 
 The `civicclerk` adapter reads the public Macon-Bibb CivicClerk API, scoped to
-category **26 (Board of Commissioners)**. The county also assigns some
-Pre-Commission meetings to this category. Other committees are excluded.
+category **26 (Board of Commissioners)**, including Pre-Commission meetings.
+It also reads category **24 (General)** and selects explicitly named special-called
+commission/pre-commission meetings, Committee on Committees, and public hearings
+(including FY budget hearings). The county files these legislative records outside
+category 26. Unrelated General boards and unnamed events are excluded.
 It collects local meeting times, cancellation labels, published agenda/packet
 and minutes PDFs, and downloadable attachments nested within agenda items.
 Documents retain source IDs, roles, titles, SHA-256 checksums and byte sizes in
@@ -172,6 +176,21 @@ Use narrow date windows: real agenda packets can exceed 64 MB. Limits and failed
 required downloads withhold the affected meeting's proposal and preserve its
 previous record. Other successfully collected meetings may produce proposals in
 a partial run. Absence from a listing never deletes a stored meeting.
+
+For an annual capture, use the explicit bounded profile and resume incomplete
+bundles from their saved checkpoint:
+
+```sh
+uv run --locked civpulse-updater collect macon-bibb-commission --from 2026-01-01 --to 2026-12-31 --systematic
+uv run --locked civpulse-updater collect macon-bibb-commission --from 2026-01-01 --to 2026-12-31 --systematic --resume-run RUN_ID
+```
+
+This permits 100 meetings, ten listing pages, 5,000 supporting resources,
+2,000 requests, 500 MB per response and 10 GB per run, with one-second pacing.
+It does not enable browser recovery or publication. A complete capture covers
+currently posted records, including future schedules; later revisions and
+unpublished minutes require a fresh collection. General-category unnamed events
+cannot be attributed to the commission and require separate scope review.
 
 The core supports optional `start_urls(window)`, `resources(content, saved_bytes)`
 and `parse_bundle(content, reference, hash, window, saved_bytes)` adapter hooks.
@@ -201,8 +220,8 @@ uv run civpulse-updater replay RUN_ID
 ```
 
 The `simbli` adapter uses the district's official Simbli tenant, **4013**. It
-includes meeting types **Board Meeting**, **Committee Meeting**, and **Work
-Session**; individual school councils and other meeting types are excluded.
+includes meeting types **Board Meeting**, **Committee Meeting**, **Work
+Session**, and **Training Meeting**; individual school councils and other meeting types are excluded.
 Schedules use America/New_York. A publicly listed meeting without a published
 agenda can produce a schedule-only proposal with a warning.
 
@@ -214,7 +233,9 @@ exclusions occur, the proposed document is a labelled public projection with a
 warning and its own checksum; original source bytes remain private evidence.
 Unknown visibility states or contradictory detail visibility still fail closed.
 Original PDF, Office, PNG and JPEG attachments are
-stored unchanged. These files are evidence, not rendered or executed by the
+stored unchanged. Historical attachments with an absent or empty filename use
+the source's explicit `FileExtension`, subject to the same format allowlist and
+file-signature validation. These files are evidence, not rendered or executed by the
 collector. External hyperlinks, videos, linked policy libraries, OCR, extracted
 votes and other attachment formats are outside this first version's scope.
 
@@ -223,7 +244,11 @@ Minutes are requested only when the **public listing** says `PUBLISHED`.
 published. The meeting detail API's minutes flag proved inconsistent with the
 public listing, so it is not used to authorize retrieval. Later publication or a
 changed attachment creates a fresh review proposal. Failed required downloads
-withhold the affected meeting, preserving the previous record.
+withhold the affected meeting, preserving the previous record. If a document
+endpoint returns an HTML page, other verified public resources in that bundle
+are still checkpointed; the unavailable file is attempted once per run and the
+bundle remains incomplete. Source deferrals and challenge failures still stop
+network access.
 
 The initial public listing contains the latest 50 meetings across all types.
 Older pages use the observed **read-only** `GetMeetingListing` POST, with public
@@ -387,6 +412,11 @@ PLAYWRIGHT_BROWSERS_PATH=/tmp/civpulse-playwright uv run --extra browser civpuls
 that window; collection resumes when Simbli returns the requested listing or
 document. If the verified page does not redirect, reload the page manually.
 Closing the window cancels that recovery. A working desktop display is required.
+After manual verification, the recognized empty official attachment form ends
+the browser wait and preserves session cookies. Its HTML remains failed document
+evidence; it cannot become a valid file or complete meeting bundle. Unknown HTML
+and challenge responses do not receive this treatment.
+
 No CAPTCHA solver, answer generation, stealth patches, or persistent browser
 profile is used. Successful session cookies stay in memory for this run only.
 
@@ -407,3 +437,283 @@ Verification requests and responses are captured in private local evidence, whic
 can contain session tokens. Do not share or commit `.state`. Unattended/headless
 runs retain their original stricter behavior. If the retained run or download
 budget is exhausted, recovery stops; manual mode does not reset any counters.
+
+## Georgia General Assembly
+
+```sh
+uv run --locked civpulse-updater sources validate georgia-legislature
+uv run --locked civpulse-updater collect georgia-legislature --from 2025-01-01 --to 2026-12-31 --full-session --resume-latest
+uv run --locked civpulse-updater collect georgia-legislature --from 2025-01-01 --to 2026-12-31 --full-session --resume-run RUN_ID
+uv run --locked civpulse-updater changes list
+uv run --locked civpulse-updater replay RUN_ID
+```
+
+The `georgia-legislature` connector reads the official website's public API at
+`https://www.legis.ga.gov/api/`. Its manifest pins session **1033, 2025–2026 Regular
+Session**. Change `legislature_session_id` to collect a different official session;
+the session listing validates that ID. The connector uses the website's anonymous
+token handshake, with the token held only in memory. No account is required.
+
+Coverage includes:
+
+- Session metadata and bills/resolutions, with sponsors, versions/document links,
+  committee referrals, status histories and linked votes.
+- House and Senate vote details, official totals, member ballot codes and bill
+  relationships. Repeated `VACANT` entries with member ID zero remain anonymous;
+  they are never joined to a legislator or assigned a district. House attendance
+  roll calls use official listing totals only, matching the website's deliberate
+  omission of individual detail; their records carry an explicit warning.
+- Member profiles, contact information, party codes, service history and committee
+  assignments; committees, officers, memberships and subcommittees.
+- Seats derived from the official roster's district records. These carry a review
+  warning: session rosters include former members and do not establish current
+  occupancy, a complete vacancy history, or unrepresented districts.
+- Meeting schedules and calendar/publication metadata for both chambers on the
+  official session's listed legislative days. Meeting times use America/New_York;
+  source midnight means time TBD and produces a warned date-only schedule.
+  Explicit Canceled/Cancelled title prefixes normalize to cancelled status with
+  a warning identifying that source basis.
+
+Bills, members, committees and derived seats are **whole-session snapshots**, even
+for a one-day collection. Votes and meetings use the inclusive requested dates.
+Calendar metadata is collected for listed legislative days inside that window;
+this does not assert coverage of interim calendar publications. The schedule
+endpoint exposes currently available meetings, not a guaranteed historical archive.
+PDF agenda links, bill versions and calendar document URLs are retained, but this
+connector does not download their binaries, extract PDF text, or collect video,
+transcripts, geographic boundaries or separate study-committee detail pages.
+Upstream field names and enum codes are preserved in each legislative record's
+`data`; no undocumented party, vote or document-type codes are guessed.
+
+Non-event proposals have an explicit `record_type` (`session`, `bill`, `vote`,
+`member`, `seat`, `committee`, `calendar`), `session_id`, stable source identity,
+and structured `data`. They use the same local changes/review workflow and
+immutable evidence store as events. Replay is offline. Existing event hashes and
+publication behavior are unchanged; approval is local and `publish` remains disabled.
+Feeds that contain complete records are parsed from their saved discovery bytes,
+so parsing uses the same observation without a second download of the feed.
+
+`--resume-latest` makes this same command safe to rerun after interruption: while
+holding the state lock, it selects the newest usable checkpoint matching the
+source, session and dates, verifies saved checksums, and downloads only missing
+inputs. After a completed capture, the command starts fresh to observe revisions.
+A newer run with incomplete discovery also starts fresh; it never revives an older
+snapshot. Corrupted evidence stops collection before network access. Use
+`--resume-run RUN_ID` to choose an explicit checkpoint instead; the two options
+are mutually exclusive.
+
+`--full-session` permits a window of up to 731 days for this adapter only.
+Ordinary collection retains its 367-day limit. The source permits 100 listing
+pages, 10,000 detail references, 1,000 supporting
+resources, 10,000 requests, 20 MB per response and 1 GB total, paced at one request
+per second. Even a narrow date window can fetch thousands of bills and take hours.
+These are ceilings, not coverage guarantees. Search uses the official read-only
+session-filtered POST with 200 rows per page; its exact request is retained as
+private evidence. Missing/short pages, changed totals, duplicate bill identities,
+wrong sessions and unavailable detail responses make a run partial or failed.
+Successfully captured records remain reviewable; missing records are never deleted.
+`--resume-run RUN_ID` reuses checkpointed detail downloads when discovery completed;
+changed session IDs or incomplete discovery require a fresh capture.
+
+The website's API and anonymous handshake are undocumented and may change. Source
+validation checks configuration, not network availability or completeness. Live
+endpoint samples and offline fixture validation are described in
+[Georgia connector validation](docs/georgia-legislature-validation-2026-10-26.md).
+
+## Georgia SOS turnout
+
+```sh
+uv run --locked civpulse-updater sources validate georgia-sos-turnout
+uv run --locked civpulse-updater collect georgia-sos-turnout --from 2026-11-03 --to 2026-11-03
+uv run --locked civpulse-updater changes list
+uv run --locked civpulse-updater replay RUN_ID
+```
+
+The `georgia-sos-turnout` adapter starts the Georgia Secretary of State voter and
+election import pipeline with **aggregate, unofficial turnout** from the public
+[Election Data Hub](https://sos.ga.gov/page/election-data-hub-unofficial-turnout).
+The source manifest points directly to the dashboard linked by that page. The
+page itself currently rejects the updater's direct HTTP request.
+
+**Dates select election dates**, inclusively, rather than ballot-casting dates or
+snapshot dates. For example, the command above captures the currently reported
+November 3 election aggregates, including early voting observed before Election
+Day. It does not reconstruct a past daily snapshot. Only election dates currently
+exposed by the dashboard are available; an empty selection window is not evidence
+that no election occurred.
+
+Each selected election produces three `record_type: "turnout"` table snapshots:
+
+- Early in-person ballots accepted, by county.
+- Absentee activity by county: requested, issued, returned, accepted, rejected,
+  spoiled/canceled, outstanding, and the source acceptance ratio.
+- Turnout by county and the source's grouped ballot style.
+
+Each snapshot contains sorted dimension rows, numeric values and original display
+text, the public table ID, official measure/dimension definitions, and the table's
+as-of footnote when supplied. Ratios remain ratios (for example, `1` displayed as
+`100.00%`); null/NaN measures remain null. Missing counties/ballot styles are never
+filled with zero: source tables can suppress zero/missing rows. The table's
+source expressions determine which ballot categories and dates it includes;
+these three tables must not be added together. No candidate vote totals or
+certified election outcomes are inferred from participation counts.
+
+Stable identities combine election date and table key. A later cumulative
+correction, including a lower count, replaces the prior table through the normal
+local review workflow. Repeating unchanged data or replaying a run produces no
+extra proposals. All turnout records explicitly carry `unofficial: true` and
+review warnings; approval requires acknowledging those warnings. Publication
+remains disabled, and no Civic Pulse database connection is made.
+
+The collector uses the dashboard's anonymous **Go Interactive** token endpoint
+and Qlik's TLS WebSocket API. The token remains in memory. Only three pinned public
+aggregate objects are read; selections and a temporary selection-metadata object
+exist only in that session. No persistent Qlik objects, measures, or data are
+written. The app ID, hosts and dimension definitions are pinned; unexpected
+schemas require inspection and a connector update.
+
+The original bootstrap files and RPC requests/responses are content-addressed
+private evidence. A complete snapshot embeds its ordered RPC transcript for
+network-free replay. Transport metadata distinguishes Qlik `RPC` frames from
+HTTP requests. Authentication responses and bearer headers are excluded from
+saved evidence and WebSocket wire logging. DNS addresses are validated and pinned
+while TLS still verifies the official hostname; WebSocket redirects/proxies are
+not followed. Every RPC is paced and counted, and frames, aggregate bytes,
+notifications, response time, election count and table rows are bounded.
+
+The manifest permits 1,500 total HTTP/RPC requests, 20 MB per response/snapshot,
+100 MB total network response bytes, and at least one second between requests.
+There are at most 100 listed elections, 2,000 rows per table and 1,000 cells per
+page. Broad date windows take longer and may exhaust these ceilings; prefer one
+election per run. Each capture uses one complete transcript: failed selections,
+short pages, changed layouts, extra dashboard filters, source reloads or download
+failures withhold that capture's proposals and preserve previous records. Failed
+incomplete captures require a fresh collection; successful captures support
+normal offline replay.
+
+This first increment excludes registration statistics, individual voter/history
+files, demographic charts, certified results, scheduling and publication. Add
+those as separate source contracts rather than treating turnout as voter records.
+Live and offline validation are recorded in
+[Georgia turnout validation](docs/georgia-sos-turnout-validation-2026-10-26.md).
+
+## Macon Water Authority
+
+```sh
+uv run --locked civpulse-updater sources validate macon-water-authority
+uv run --locked civpulse-updater collect macon-water-authority --from 2026-10-08 --to 2026-10-08
+uv run --locked civpulse-updater changes list
+uv run --locked civpulse-updater replay RUN_ID
+```
+
+The `macon-water-authority` adapter reads the public Diligent Community portal
+linked by the [authority's publications page](https://maconwater.org/public-information/publications/).
+It includes the authority board, Engineering, Finance, Outdoor, Pension,
+Pension Trustee, Personnel and Policy meeting types. The mixed imported archive
+(type 17) is included only for titles starting `Macon Water Authority -`.
+Macon Soils, Macon Water Alliance and external calendars are excluded.
+
+Dates are inclusive America/New_York dates. Requests extend through the next day
+and returned records are filtered locally: the portal returns no records for
+identical `from` and `to` parameters. Stable meeting IDs survive rescheduling;
+ambiguous/nonexistent local timestamps and conflicting identities fail parsing.
+Calendar entries without a published agenda become schedule-only proposals with
+a warning. Status remains unknown unless the title explicitly says cancelled,
+which produces a cancellation warning. Regular meeting times are never generated
+from the authority's general monthly schedule.
+
+Only document entries explicitly marked `IsPublic: true` are processed. Private
+document HTML and links are ignored before attachment discovery. Public agenda
+and minutes HTML is materialized byte-for-byte as UTF-8, with its own checksum,
+size and role. The original JSON response is also preserved as private evidence.
+The importer downloads same-tenant `/document/` links from that public HTML;
+PDFs and HTML documents bearing the portal's iCompass/Aspose document markers
+are accepted. Other HTML responses fail validation;
+earlier minutes linked within an agenda retain the `Attachment` role. A failed,
+missing or unsupported attachment withholds that meeting's proposal. Approval remains
+local and publishing is disabled.
+
+This module does not fetch DOCX/full agenda-packet exports, external link
+attachments, images, videos, BoardDocs archives, board member records or election
+records. It does not extract PDF text or perform OCR. Returned document JSON can
+contain private metadata: keep the evidence directory private and out of Git.
+The portal's service is undocumented and may change. A complete run covers the
+records returned by its date-filtered listing, not a guaranteed historical
+archive. Missing records never delete prior observations. No browser fallback or
+systematic capture profile is enabled. Default limits are 100 meetings, 500
+supporting resources, 100 MB per response, 500 MB total and one-second pacing.
+See [validation notes](docs/macon-water-validation-2026-10-27.md).
+
+## Georgia Qlik statistics summaries
+
+```sh
+uv run --locked civpulse-updater capture-qlik all
+```
+
+This is the default, compact download for the SOS turnout and registration
+pages. It fetches **numerical summaries**, with no rendered charts, map geometry,
+chart inventories, raw voter/linkage tables, raw historical tables, or exhaustive
+field-value dumps. Aggregation happens in Qlik before data is transferred.
+
+The bundle contains:
+
+- Latest active/inactive registration counts by county.
+- Separate current county/status summaries for race, gender and age group,
+  avoiding the much larger joint demographic cross product.
+- County/status/municipal-precinct counts where that field is populated. Missing,
+  empty and `-` precinct groups are omitted and recorded as an omission count;
+  county totals are retained. Municipal precincts are not county election
+  precincts; Bibb currently has no usable breakdown in that field.
+- County/status registration totals for every available historical snapshot date,
+  using the published monthly measure, including its July 2025 correction. The
+  current source exposes 56 dates, approximately 18,000 historical county/status
+  rows rather than its 9.3-million-row underlying model table.
+- Current-election early-voting counts, absentee activity and turnout by county
+  and ballot style. "Current" selects the next advertised election on/after today
+  in America/New_York, or the latest advertised election when none is upcoming.
+
+The data is saved as `qlik-statistics-all.json` under the state directory, alongside
+SHA-256-addressed evidence and local review proposals. Every bundle is rebuilt
+from the exact run's stored evidence, so old wider datasets are not accidentally
+included. Combined-source failure preserves the last successful bundle instead
+of replacing it with partial results. Repeating unchanged source data creates no
+additional review proposals. Approvals remain local; publishing is unavailable.
+
+```sh
+uv run --locked civpulse-updater capture-qlik registration
+uv run --locked civpulse-updater capture-qlik turnout
+uv run --locked civpulse-updater replay RUN_ID
+```
+
+The first two commands write `qlik-statistics-registration.json` and
+`qlik-statistics-turnout.json`, respectively. The combined command includes all
+available **summarized registration history**, without a raw-history download or
+a one-year date cutoff. Turnout is limited to one election in this command.
+
+For an explicit date window, the original collection commands remain available:
+
+```sh
+uv run --locked civpulse-updater collect georgia-sos-registration --from 2026-10-01 --to 2026-11-01
+uv run --locked civpulse-updater collect georgia-sos-turnout --from 2026-11-03 --to 2026-11-03
+```
+
+Registration dates select snapshot labels and the live app's reload date; turnout
+dates select elections. Explicit registration collections also use the compact
+profile: separate current summaries plus county/status history only. A historical
+window does not reconstruct an earlier live electorate. Missing/suppressed rows
+are not zero, demographic tables overlap, and distinct counts may not be additive.
+Source snapshot dates and reload timestamps are retained, since the live and
+monthly registration apps can have different freshness.
+
+`capture-qlik` no longer invokes the full-archive exporter. Its retired
+`--inventory-only` flag is rejected. Existing full/partial archives and older
+aggregate captures are preserved for audit, not automatically resumed or deleted.
+`verify-qlik SNAPSHOT_ID` still verifies old archives offline. Old schema-1
+registration and turnout evidence remains replayable; new compact registration
+and current-election captures record their scope explicitly as schema 2.
+
+Default summary budgets are 1,500 requests and 100 MB received **per source**, with
+normal source pacing. `--max-requests` and `--max-total-bytes` can adjust these
+bounds; individual voter identifiers are never returned as data dimensions. The
+source's published table measure definitions and original aggregate RPC evidence
+are retained, without downloading visual assets or native chart/map exports.

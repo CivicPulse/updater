@@ -4,6 +4,7 @@ import json
 
 from loguru import logger
 
+from .adapters.simbli import PublicDocumentUnavailable
 from .evidence import EvidenceStore
 from .models import ListingRequest, Reference, SourceConfig, Window, digest
 from .plugins import load_adapter
@@ -15,6 +16,50 @@ class ResumeError(ValueError):
     """Operator guidance consisting only of fixed, non-sensitive messages."""
 
 
+def resume_identity(config: SourceConfig):
+    return (
+        config.id,
+        config.adapter,
+        config.url,
+        config.allowed_hosts,
+        config.timezone,
+        config.legislature_session_id,
+        config.qlik_all_history,
+        config.qlik_current_election,
+    )
+
+
+def latest_resumable_run(state: State, config: SourceConfig, window: Window):
+    """Called while holding the state lock; never revive a superseded snapshot."""
+    candidates = state.rows(
+        "SELECT id,status,config,window FROM runs WHERE source=:source ORDER BY started_at DESC",
+        source=config.id,
+    )
+    for row in candidates:
+        original = SourceConfig.model_validate_json(row["config"])
+        if (
+            resume_identity(original) != resume_identity(config)
+            or Window.model_validate_json(row["window"]) != window
+        ):
+            continue
+        # The newest matching observation controls recovery. A completed or
+        # non-resumable newer run must not revive an older unfinished snapshot.
+        if row["status"] == "complete":
+            return None
+        checkpoint = state.rows(
+            "SELECT errors,inputs != '[]' AS has_inputs FROM runs WHERE id=:id",
+            id=row["id"],
+        )[0]
+        errors = json.loads(checkpoint["errors"])
+        if not checkpoint["has_inputs"] or any(
+            error.get("stage") == "discover" or error.get("code") == "event_limit"
+            for error in errors
+        ):
+            return None
+        return row["id"]
+    return None
+
+
 def collect(
     state: State,
     store: EvidenceStore,
@@ -23,6 +68,8 @@ def collect(
     fetcher=None,
     resume_run=None,
 ):
+    if window.full_session and config.adapter != "georgia-legislature":
+        raise ValueError("Full-session windows require the Georgia legislature adapter")
     adapter = load_adapter(config)
     validate_url(config.url, config.allowed_hosts)
     previous_inputs = []
@@ -40,23 +87,14 @@ def collect(
             )
         original = SourceConfig.model_validate_json(previous["config"])
         if (
-            original.id,
-            original.adapter,
-            original.url,
-            original.allowed_hosts,
-            original.timezone,
-        ) != (
-            config.id,
-            config.adapter,
-            config.url,
-            config.allowed_hosts,
-            config.timezone,
-        ) or Window.model_validate_json(previous["window"]) != window:
+            resume_identity(original) != resume_identity(config)
+            or Window.model_validate_json(previous["window"]) != window
+        ):
             raise ResumeError("Resume source and window must match")
         previous_inputs = json.loads(previous["inputs"])
         if not previous_inputs:
             raise ResumeError(
-                "Run has no checkpointed meetings; start a fresh collection"
+                "Run has no checkpointed records; start a fresh collection"
             )
         for entry in previous_inputs:
             ref = Reference.model_validate(entry["reference"])
@@ -84,6 +122,33 @@ def collect(
                 state.observe(run, evidence.model_dump(mode="json"))
 
             fetcher = SimbliFetcher(config, state.root, capture)
+        elif config.adapter == "georgia-legislature":
+            from .georgia_transport import GeorgiaFetcher
+
+            def capture(body, evidence):
+                if store.put(body) != evidence.sha256:
+                    raise ValueError("Georgia evidence mismatch")
+                state.observe(run, evidence.model_dump(mode="json"))
+
+            fetcher = GeorgiaFetcher(config, capture)
+        elif config.adapter == "georgia-sos-registration":
+            from .registration_transport import GeorgiaRegistrationFetcher
+
+            def capture(body, evidence):
+                if store.put(body) != evidence.sha256:
+                    raise ValueError("Registration evidence mismatch")
+                state.observe(run, evidence.model_dump(mode="json"))
+
+            fetcher = GeorgiaRegistrationFetcher(config, window, capture)
+        elif config.adapter == "georgia-sos-turnout":
+            from .turnout_transport import GeorgiaTurnoutFetcher
+
+            def capture(body, evidence):
+                if store.put(body) != evidence.sha256:
+                    raise ValueError("Turnout evidence mismatch")
+                state.observe(run, evidence.model_dump(mode="json"))
+
+            fetcher = GeorgiaTurnoutFetcher(config, window, capture)
         else:
             fetcher = Fetcher(config)
     inputs, errors, refs = [], [], {}
@@ -172,9 +237,18 @@ def collect(
         if entry.get("complete", True) and entry.get("sha256"):
             continue
         stop_network = False
+        failed_resources = set()
         try:
             if entry.get("sha256"):
                 body = store.read(entry["sha256"])
+            elif hasattr(
+                adapter, "uses_listing_content"
+            ) and adapter.uses_listing_content(ref):
+                # Reuse original listing bytes as a replay input, never invent
+                # a successful detail request for a listing-only record.
+                body = store.read(ref.listing_hash)
+                entry["sha256"] = ref.listing_hash
+                state.save_inputs(run, inputs, errors)
             else:
                 body, evidence = fetcher.get(ref.url)
                 sha = store.put(body)
@@ -194,7 +268,11 @@ def collect(
                         if hasattr(adapter, "resources_for")
                         else adapter.resources(body, resources)
                     )
-                    missing = [url for url in needed if url not in resources]
+                    missing = [
+                        url
+                        for url in needed
+                        if url not in resources and url not in failed_resources
+                    ]
                     if not missing:
                         break
                     for resource_url in missing:
@@ -208,16 +286,32 @@ def collect(
                             raise ValueError("Resource evidence mismatch")
                         state.observe(run, metadata.model_dump(mode="json"))
                         if hasattr(adapter, "validate_resource"):
-                            adapter.validate_resource(
-                                body, ref, resources, resource_url, resource_body
-                            )
+                            try:
+                                adapter.validate_resource(
+                                    body, ref, resources, resource_url, resource_body
+                                )
+                            except PublicDocumentUnavailable:
+                                # Retain the failed response as evidence, but fetch
+                                # the other verified public resources once. The
+                                # bundle stays incomplete and cannot be proposed.
+                                failed_resources.add(resource_url)
+                                errors.append(
+                                    {
+                                        "stage": "fetch",
+                                        "code": "PublicDocumentUnavailable",
+                                        "meeting_url": ref.url,
+                                        "detail": "Public document returned HTML; bundle remains incomplete",
+                                    }
+                                )
+                                state.save_inputs(run, inputs, errors)
+                                continue
                         resources[resource_url] = resource_body
                         entry.setdefault("resources", {})[resource_url] = resource_sha
                         state.save_inputs(run, inputs, errors)
                 entry["resources"] = {
                     url: store.put(data) for url, data in resources.items()
                 }
-            entry["complete"] = True
+            entry["complete"] = not failed_resources
         except (ValueError, OSError, KeyError, TypeError) as error:
             stop_network = isinstance(error, FetchError) and (
                 not isinstance(error, ResponseLimitError) or error.aggregate

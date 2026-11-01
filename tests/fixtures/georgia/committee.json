@@ -1,0 +1,869 @@
+{
+  "id": 87,
+  "sessionId": 1033,
+  "sessions": [
+    {
+      "id": 1034,
+      "isCurrent": false,
+      "description": "2026 Special Session",
+      "library": "2026EX",
+      "type": 2,
+      "sessionSuffix": null
+    },
+    {
+      "id": 1033,
+      "isCurrent": true,
+      "description": "2025-2026 Regular Session",
+      "library": "20252026",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 1031,
+      "isCurrent": false,
+      "description": "2023-2024 Regular Session",
+      "library": "20232024",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 1032,
+      "isCurrent": false,
+      "description": "2023 Special Session",
+      "library": "2023EX",
+      "type": 2,
+      "sessionSuffix": null
+    },
+    {
+      "id": 1029,
+      "isCurrent": false,
+      "description": "2021-2022 Regular Session",
+      "library": "20212022",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 1030,
+      "isCurrent": false,
+      "description": "2021 Special Session",
+      "library": "2021EX",
+      "type": 2,
+      "sessionSuffix": null
+    },
+    {
+      "id": 1027,
+      "isCurrent": false,
+      "description": "2020 Special Session",
+      "library": "2020EX",
+      "type": 2,
+      "sessionSuffix": null
+    },
+    {
+      "id": 27,
+      "isCurrent": false,
+      "description": "2019-2020 Regular Session",
+      "library": "20192020",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 26,
+      "isCurrent": false,
+      "description": "2018 Special Session",
+      "library": "2018EX",
+      "type": 2,
+      "sessionSuffix": null
+    },
+    {
+      "id": 25,
+      "isCurrent": false,
+      "description": "2017-2018 Regular Session",
+      "library": "20172018",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 24,
+      "isCurrent": false,
+      "description": "2015-2016 Regular Session",
+      "library": "20152016",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 23,
+      "isCurrent": false,
+      "description": "2013-2014 Regular Session",
+      "library": "20132014",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 21,
+      "isCurrent": false,
+      "description": "2011-2012 Regular Session",
+      "library": "20112012",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 22,
+      "isCurrent": false,
+      "description": "2011 Special Session",
+      "library": "2011EX1",
+      "type": 2,
+      "sessionSuffix": null
+    },
+    {
+      "id": 20,
+      "isCurrent": false,
+      "description": "2009-2010 Regular Session",
+      "library": "20092010",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 18,
+      "isCurrent": false,
+      "description": "2007-2008 Regular Session",
+      "library": "20072008",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 14,
+      "isCurrent": false,
+      "description": "2005-2006 Regular Session",
+      "library": "20052006",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 15,
+      "isCurrent": false,
+      "description": "2005 Special Session",
+      "library": "2005EX1",
+      "type": 2,
+      "sessionSuffix": null
+    },
+    {
+      "id": 13,
+      "isCurrent": false,
+      "description": "2004 Special Session",
+      "library": "2004EX1",
+      "type": 2,
+      "sessionSuffix": null
+    },
+    {
+      "id": 11,
+      "isCurrent": false,
+      "description": "2003-2004 Regular Session",
+      "library": "20032004",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 1,
+      "isCurrent": false,
+      "description": "2001-2002 Regular Session",
+      "library": "20012002",
+      "type": 1,
+      "sessionSuffix": null
+    },
+    {
+      "id": 6,
+      "isCurrent": false,
+      "description": "2001 1st Special Session",
+      "library": "2001EX1",
+      "type": 2,
+      "sessionSuffix": null
+    },
+    {
+      "id": 7,
+      "isCurrent": false,
+      "description": "2001 2nd Special Session",
+      "library": "2001EX2",
+      "type": 2,
+      "sessionSuffix": null
+    }
+  ],
+  "address": {
+    "address1": "228-B State Capitol",
+    "address2": "",
+    "city": "Atlanta",
+    "state": "Ga        ",
+    "zip": "30334     ",
+    "phone": "4046565099",
+    "fax": "4046566897",
+    "email": null
+  },
+  "name": "Agriculture & Consumer Affairs",
+  "description": "The House Agricultural and Consumer Affairs Committee hears legislation that impacts Georgia\u2019s largest economic industry, Agriculture. Other areas of concern are human nutrition, consumer consumption of food and its safety aspects, and plant industry.  ",
+  "staff": "<p><a href=\"mailto:anna.smith@house.ga.gov\">Anna Smith - Budget &amp; Policy Analyst</a></p><p><a href=\"mailto:kimberly.romaine@house.ga.gov\">Kimberly Romaine - Committee Assistant</a></p>",
+  "members": [
+    {
+      "roleSort": 1,
+      "id": 791,
+      "name": "Robert Dickey",
+      "role": "Chairman",
+      "dateVacated": null,
+      "district": {
+        "id": 188,
+        "number": 134,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 3,
+      "id": 4970,
+      "name": "Joe Campbell",
+      "role": "Vice Chairman",
+      "dateVacated": null,
+      "district": {
+        "id": 227,
+        "number": 171,
+        "chamberType": 1,
+        "suffix": "st"
+      }
+    },
+    {
+      "roleSort": 5,
+      "id": 5033,
+      "name": "David Huddleston",
+      "role": "Secretary",
+      "dateVacated": null,
+      "district": {
+        "id": 114,
+        "number": 72,
+        "chamberType": 1,
+        "suffix": "nd"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 4986,
+      "name": "Mike Cameron",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 1,
+        "number": 1,
+        "chamberType": 1,
+        "suffix": "st"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5004,
+      "name": "Beth Camp",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 189,
+        "number": 135,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5058,
+      "name": "Chas Cannon",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 228,
+        "number": 172,
+        "chamberType": 1,
+        "suffix": "nd"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 3877,
+      "name": "Doreen Carter",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 141,
+        "number": 93,
+        "chamberType": 1,
+        "suffix": "rd"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 859,
+      "name": "John Corbett",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 230,
+        "number": 174,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5021,
+      "name": "Brent Cox",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 34,
+        "number": 28,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5072,
+      "name": "Robert Dawson",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 98,
+        "number": 65,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 4886,
+      "name": "Matt Dubnik",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 35,
+        "number": 29,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 797,
+      "name": "Emory Dunahoo",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 37,
+        "number": 31,
+        "chamberType": 1,
+        "suffix": "st"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5085,
+      "name": "Jaclyn Ford",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 226,
+        "number": 170,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 4987,
+      "name": "Stan Gunter",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 10,
+        "number": 8,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5010,
+      "name": "Leesa Hagan",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 212,
+        "number": 156,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5082,
+      "name": "Tangie Herring",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 201,
+        "number": 145,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5073,
+      "name": "Jutt Howard",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 111,
+        "number": 71,
+        "chamberType": 1,
+        "suffix": "st"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 755,
+      "name": "Rick Jasperse",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 13,
+        "number": 11,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5005,
+      "name": "David Jenkins",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 190,
+        "number": 136,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 4993,
+      "name": "Rob Leverett",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 173,
+        "number": 123,
+        "chamberType": 1,
+        "suffix": "rd"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5001,
+      "name": "Regina Lewis-Ward",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 163,
+        "number": 115,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 4999,
+      "name": "Marvin Lim",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 146,
+        "number": 98,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5045,
+      "name": "Reynaldo \"Rey\" Martinez",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 159,
+        "number": 111,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 4959,
+      "name": "Danny Mathis",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 187,
+        "number": 133,
+        "chamberType": 1,
+        "suffix": "rd"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 4961,
+      "name": "Steven Meeks",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 234,
+        "number": 178,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5084,
+      "name": "Angie O'Steen",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 225,
+        "number": 169,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5050,
+      "name": "Tremaine Teddy Reese",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 194,
+        "number": 140,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5052,
+      "name": "David Sampson",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 209,
+        "number": 153,
+        "chamberType": 1,
+        "suffix": "rd"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 4990,
+      "name": "Tyler Paul Smith",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 24,
+        "number": 18,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 811,
+      "name": "Patty Marie Stinson",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 206,
+        "number": 150,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 786,
+      "name": "Darlene Taylor",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 229,
+        "number": 173,
+        "chamberType": 1,
+        "suffix": "rd"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 4998,
+      "name": "Rhonda Taylor",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 140,
+        "number": 92,
+        "chamberType": 1,
+        "suffix": "nd"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 5027,
+      "name": "Inga Willis",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 77,
+        "number": 55,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    },
+    {
+      "roleSort": 7,
+      "id": 4969,
+      "name": "Bill Yearta",
+      "role": "Member",
+      "dateVacated": null,
+      "district": {
+        "id": 208,
+        "number": 152,
+        "chamberType": 1,
+        "suffix": "nd"
+      }
+    }
+  ],
+  "membersArchive": [
+    {
+      "roleSort": 7,
+      "id": 810,
+      "name": "Karen Bennett",
+      "role": "Member",
+      "dateVacated": "2026-01-01T00:00:00",
+      "district": {
+        "id": 142,
+        "number": 94,
+        "chamberType": 1,
+        "suffix": "th"
+      }
+    }
+  ],
+  "buttonGroup": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "cmsTitle": null,
+    "buttons": [
+      {
+        "type": 1,
+        "id": "00000000-0000-0000-0000-000000000000",
+        "cmsTitle": null,
+        "icon": "external-link-square-alt",
+        "iconLibrary": "",
+        "title": "Meeting Archives",
+        "url": "/committees/house/archive/87",
+        "resourceArea": null
+      }
+    ]
+  },
+  "subcommittees": [
+    {
+      "id": 2138,
+      "name": "Consumer Affairs",
+      "subcommitteeMembersArchive": [],
+      "members": [
+        {
+          "roleSort": 2,
+          "id": 5021,
+          "name": "Brent Cox",
+          "role": "Chairman of Subcommittee",
+          "dateVacated": null,
+          "district": {
+            "id": 34,
+            "number": 28,
+            "chamberType": 1,
+            "suffix": "th"
+          }
+        },
+        {
+          "roleSort": 6,
+          "id": 4986,
+          "name": "Mike Cameron",
+          "role": "Vice-Chairman of Subcommittee",
+          "dateVacated": null,
+          "district": {
+            "id": 1,
+            "number": 1,
+            "chamberType": 1,
+            "suffix": "st"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 5058,
+          "name": "Chas Cannon",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 228,
+            "number": 172,
+            "chamberType": 1,
+            "suffix": "nd"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 5072,
+          "name": "Robert Dawson",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 98,
+            "number": 65,
+            "chamberType": 1,
+            "suffix": "th"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 5085,
+          "name": "Jaclyn Ford",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 226,
+            "number": 170,
+            "chamberType": 1,
+            "suffix": "th"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 5082,
+          "name": "Tangie Herring",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 201,
+            "number": 145,
+            "chamberType": 1,
+            "suffix": "th"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 5073,
+          "name": "Jutt Howard",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 111,
+            "number": 71,
+            "chamberType": 1,
+            "suffix": "st"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 4999,
+          "name": "Marvin Lim",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 146,
+            "number": 98,
+            "chamberType": 1,
+            "suffix": "th"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 5045,
+          "name": "Reynaldo \"Rey\" Martinez",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 159,
+            "number": 111,
+            "chamberType": 1,
+            "suffix": "th"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 4959,
+          "name": "Danny Mathis",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 187,
+            "number": 133,
+            "chamberType": 1,
+            "suffix": "rd"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 5084,
+          "name": "Angie O'Steen",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 225,
+            "number": 169,
+            "chamberType": 1,
+            "suffix": "th"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 4990,
+          "name": "Tyler Paul Smith",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 24,
+            "number": 18,
+            "chamberType": 1,
+            "suffix": "th"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 811,
+          "name": "Patty Marie Stinson",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 206,
+            "number": 150,
+            "chamberType": 1,
+            "suffix": "th"
+          }
+        },
+        {
+          "roleSort": 7,
+          "id": 5027,
+          "name": "Inga Willis",
+          "role": "Member",
+          "dateVacated": null,
+          "district": {
+            "id": 77,
+            "number": 55,
+            "chamberType": 1,
+            "suffix": "th"
+          }
+        }
+      ]
+    }
+  ]
+}
